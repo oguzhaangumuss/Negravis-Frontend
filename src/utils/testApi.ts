@@ -58,5 +58,5 @@ export const testOracleAPIs = async () => {
 
 // For browser console testing
 if (typeof window !== 'undefined') {
-  (window as Record<string, unknown>).testOracleAPIs = testOracleAPIs;
+  (window as unknown as Record<string, unknown>).testOracleAPIs = testOracleAPIs;
 }

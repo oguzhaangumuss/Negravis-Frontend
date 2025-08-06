@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   title: "Negravis Oracle - Real-time Multi-Source Oracle System",
   description: "Advanced Oracle platform providing real-time cryptocurrency prices, weather data, and custom API integrations with Hedera blockchain support and AI-powered consensus mechanisms.",
   keywords: ["oracle", "hedera", "blockchain", "cryptocurrency", "weather", "api", "real-time", "consensus", "chainlink", "coingecko"],
-  authors: [{ name: "Oğuzhan Gümüş", email: "oguzhan@example.com" }],
+  authors: [{ name: "Oğuzhan Gümüş" }],
   creator: "Oğuzhan Gümüş",
   publisher: "Negravis",
   applicationName: "Negravis Oracle",
