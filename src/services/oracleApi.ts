@@ -237,7 +237,7 @@ class OracleApiService {
       console.error('Health check error:', error);
       return {
         success: false,
-        error: error.message
+        error: error instanceof Error ? error.message : 'Unknown error'
       };
     }
   }
@@ -264,7 +264,7 @@ class OracleApiService {
       console.error('Batch query error:', error);
       return {
         success: false,
-        error: error.message
+        error: error instanceof Error ? error.message : 'Unknown error'
       };
     }
   }
