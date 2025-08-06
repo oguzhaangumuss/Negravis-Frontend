@@ -1,0 +1,809 @@
+openapi: 3.0.3
+info:
+  title: Negravis Oracle API
+  description: |
+    Advanced Oracle platform providing real-time cryptocurrency prices, weather data, and custom API integrations with Hedera blockchain support and AI-powered consensus mechanisms.
+    
+    ## Features
+    - **Multi-Source Data Aggregation**: Combines data from Chainlink, CoinGecko, Weather APIs, and custom sources
+    - **AI-Powered Consensus**: Smart consensus algorithms for data accuracy
+    - **Real-time Updates**: Live data feeds with low latency
+    - **Blockchain Integration**: Hedera Hashgraph integration for decentralized oracle services
+    - **Web Scraping**: Advanced web scraping with Brave Search API integration
+    
+    ## Authentication
+    Currently, no authentication is required for public endpoints.
+  version: 1.0.0
+  contact:
+    name: Oğuzhan Gümüş
+    url: https://github.com/oguzhaangumuss
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+    
+servers:
+  - url: https://negravis-app.vercel.app
+    description: Production server
+  - url: http://localhost:4001
+    description: Development server
+
+tags:
+  - name: Oracle Query
+    description: General oracle data queries
+  - name: Price Data
+    description: Cryptocurrency price information
+  - name: Weather Data
+    description: Weather information from multiple sources
+  - name: System
+    description: System status and provider management
+  - name: Health
+    description: Health monitoring and diagnostics
+
+paths:
+  /api/oracle/query:
+    get:
+      tags:
+        - Oracle Query
+      summary: General Oracle Query
+      description: |
+        Perform a general oracle query that can fetch data from multiple sources and apply consensus algorithms.
+        
+        **Examples:**
+        - `bitcoin price`
+        - `weather in Istanbul`
+        - `ethereum news`
+        - `stock price TSLA`
+      parameters:
+        - name: q
+          in: query
+          required: true
+          description: Query string to search for
+          schema:
+            type: string
+          examples:
+            crypto_price:
+              value: "bitcoin price"
+              summary: Get Bitcoin price
+            weather:
+              value: "weather in New York"
+              summary: Get weather data
+            news:
+              value: "latest ethereum news"
+              summary: Get news data
+        - name: sources
+          in: query
+          required: false
+          description: Comma-separated list of sources to use
+          schema:
+            type: string
+            example: "chainlink,coingecko"
+        - name: method
+          in: query
+          required: false
+          description: Consensus method to use
+          schema:
+            type: string
+            enum: [median, average, weighted, first]
+            default: median
+        - name: timeout
+          in: query
+          required: false
+          description: Query timeout in milliseconds
+          schema:
+            type: integer
+            default: 30000
+            minimum: 1000
+            maximum: 60000
+      responses:
+        '200':
+          description: Successful query response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OracleQueryResponse'
+              examples:
+                bitcoin_price:
+                  summary: Bitcoin price query
+                  value:
+                    success: true
+                    data:
+                      query: "bitcoin price"
+                      result:
+                        price: 43250.50
+                        symbol: "BTC"
+                        currency: "USD"
+                      confidence: 0.95
+                      consensus_method: "median"
+                      sources: ["chainlink", "coingecko"]
+                      timestamp: 1704067200000
+                      execution_time_ms: 1250
+        '400':
+          description: Invalid query parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/oracle/price/{symbol}:
+    get:
+      tags:
+        - Price Data
+      summary: Get Cryptocurrency Price
+      description: |
+        Retrieve real-time cryptocurrency price from multiple oracle sources with consensus validation.
+        
+        **Supported Symbols:**
+        - BTC, ETH, ADA, SOL, DOT, LINK, UNI, AAVE
+        - Most major cryptocurrencies supported by CoinGecko
+      parameters:
+        - name: symbol
+          in: path
+          required: true
+          description: Cryptocurrency symbol (e.g., BTC, ETH, ADA)
+          schema:
+            type: string
+            pattern: '^[A-Z]{2,10}$'
+          examples:
+            bitcoin:
+              value: "BTC"
+              summary: Bitcoin
+            ethereum:
+              value: "ETH" 
+              summary: Ethereum
+            cardano:
+              value: "ADA"
+              summary: Cardano
+        - name: sources
+          in: query
+          required: false
+          description: Comma-separated list of price sources
+          schema:
+            type: string
+            example: "chainlink,coingecko"
+        - name: method
+          in: query
+          required: false
+          description: Price consensus method
+          schema:
+            type: string
+            enum: [median, average, weighted]
+            default: median
+      responses:
+        '200':
+          description: Price data retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PriceResponse'
+              examples:
+                btc_price:
+                  summary: Bitcoin price with market data
+                  value:
+                    success: true
+                    data:
+                      symbol: "BTC"
+                      price: 43250.50
+                      confidence: 0.98
+                      sources: ["chainlink", "coingecko"]
+                      timestamp: 1704067200000
+                      market_data:
+                        market_cap: 847650000000
+                        volume_24h: 28500000000
+                        change_24h: 2.45
+        '404':
+          description: Symbol not found or not supported
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/oracle/weather/{location}:
+    get:
+      tags:
+        - Weather Data
+      summary: Get Weather Information
+      description: |
+        Retrieve current weather information for a specified location from multiple weather service providers.
+        
+        **Location Formats:**
+        - City names: "Istanbul", "New York", "London"
+        - City, Country: "Paris, France"
+        - Coordinates: "41.0082,28.9784" (lat,lon)
+      parameters:
+        - name: location
+          in: path
+          required: true
+          description: Location name, city, or coordinates
+          schema:
+            type: string
+          examples:
+            city:
+              value: "Istanbul"
+              summary: City name
+            city_country:
+              value: "New York, USA"
+              summary: City with country
+            coordinates:
+              value: "41.0082,28.9784"
+              summary: Latitude, longitude coordinates
+      responses:
+        '200':
+          description: Weather data retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeatherResponse'
+              examples:
+                istanbul_weather:
+                  summary: Istanbul weather data
+                  value:
+                    success: true
+                    data:
+                      location: "Istanbul, Turkey"
+                      temperature: 18.5
+                      feels_like: 17.2
+                      humidity: 65
+                      pressure: 1013.2
+                      visibility: 10
+                      wind:
+                        speed: 12.5
+                        direction: 235
+                      weather:
+                        main: "Clear"
+                        description: "clear sky"
+                        icon: "01d"
+                      confidence: 0.92
+                      sources: ["openweathermap", "weatherapi"]
+                      timestamp: 1704067200000
+        '404':
+          description: Location not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/oracle/providers:
+    get:
+      tags:
+        - System
+      summary: Get Oracle Providers
+      description: |
+        Retrieve information about all available oracle providers, their health status, performance metrics, and reliability scores.
+      responses:
+        '200':
+          description: Provider information retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProvidersResponse'
+              examples:
+                providers_list:
+                  summary: Active providers with metrics
+                  value:
+                    success: true
+                    data:
+                      total_providers: 5
+                      active_providers: 4
+                      providers:
+                        - name: "chainlink"
+                          weight: 0.35
+                          reliability: 0.98
+                          latency: 150
+                          healthy: true
+                          metrics:
+                            total_queries: 15420
+                            successful_queries: 15112
+                            success_rate: 0.98
+                            average_latency: 145
+                            last_health_check: 1704067200000
+                        - name: "coingecko"
+                          weight: 0.30
+                          reliability: 0.95
+                          latency: 220
+                          healthy: true
+                          metrics:
+                            total_queries: 12800
+                            successful_queries: 12160
+                            success_rate: 0.95
+                            average_latency: 218
+                            last_health_check: 1704067180000
+
+  /api/oracle/status:
+    get:
+      tags:
+        - System
+      summary: Get System Status
+      description: |
+        Retrieve comprehensive system status including provider health, system metrics, and overall system health.
+      responses:
+        '200':
+          description: System status retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SystemStatusResponse'
+              examples:
+                system_status:
+                  summary: System status overview
+                  value:
+                    success: true
+                    data:
+                      system:
+                        total_providers: 5
+                        active_providers: 4
+                        system_health: 0.94
+                        last_check: 1704067200000
+                      providers:
+                        chainlink:
+                          status: "healthy"
+                          last_response: 145
+                        coingecko:
+                          status: "healthy"
+                          last_response: 220
+                        weatherapi:
+                          status: "degraded"
+                          last_response: 850
+                      health_status:
+                        chainlink: true
+                        coingecko: true
+                        weatherapi: false
+                        webscraping: true
+                        customapi: true
+                      chatbots: null
+                      uptime: 99.85
+                      timestamp: "2024-01-01T10:00:00.000Z"
+
+  /api/oracle/health-check:
+    post:
+      tags:
+        - Health
+      summary: Trigger Health Check
+      description: |
+        Manually trigger a health check for all oracle providers and return the results.
+      responses:
+        '200':
+          description: Health check completed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthCheckResponse'
+              examples:
+                health_check_result:
+                  summary: Health check results
+                  value:
+                    success: true
+                    data:
+                      timestamp: 1704067200000
+                      results:
+                        chainlink:
+                          healthy: true
+                          response_time: 145
+                          last_error: null
+                        coingecko:
+                          healthy: true
+                          response_time: 220
+                          last_error: null
+                        weatherapi:
+                          healthy: false
+                          response_time: null
+                          last_error: "Connection timeout"
+        '500':
+          description: Health check failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/oracle/batch:
+    post:
+      tags:
+        - Oracle Query
+      summary: Batch Query
+      description: |
+        Execute multiple oracle queries in a single request for improved efficiency.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                queries:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/BatchQueryItem'
+              required:
+                - queries
+            examples:
+              multiple_queries:
+                summary: Multiple data queries
+                value:
+                  queries:
+                    - query: "bitcoin price"
+                      sources: ["chainlink", "coingecko"]
+                      method: "median"
+                    - query: "weather in Istanbul"
+                      timeout: 5000
+                    - query: "ethereum news"
+                      sources: ["webscraping"]
+      responses:
+        '200':
+          description: Batch queries executed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchQueryResponse'
+              examples:
+                batch_results:
+                  summary: Batch query results
+                  value:
+                    success: true
+                    data:
+                      total_queries: 3
+                      successful_queries: 2
+                      failed_queries: 1
+                      results:
+                        - query: "bitcoin price"
+                          success: true
+                          data:
+                            price: 43250.50
+                            confidence: 0.98
+                          execution_time_ms: 450
+                        - query: "weather in Istanbul"
+                          success: true
+                          data:
+                            temperature: 18.5
+                            weather: "Clear"
+                          execution_time_ms: 380
+                        - query: "ethereum news"
+                          success: false
+                          error: "Source temporarily unavailable"
+                          execution_time_ms: 5000
+        '400':
+          description: Invalid batch query format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    OracleQueryResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Indicates if the query was successful
+        data:
+          type: object
+          properties:
+            query:
+              type: string
+              description: Original query string
+            result:
+              type: object
+              description: Query result data
+            confidence:
+              type: number
+              format: float
+              minimum: 0
+              maximum: 1
+              description: Confidence score of the result
+            consensus_method:
+              type: string
+              description: Consensus method used
+            sources:
+              type: array
+              items:
+                type: string
+              description: Data sources used
+            timestamp:
+              type: integer
+              format: int64
+              description: Unix timestamp of the query
+            execution_time_ms:
+              type: integer
+              description: Query execution time in milliseconds
+        metadata:
+          type: object
+          description: Additional metadata
+        error:
+          type: string
+          description: Error message if query failed
+
+    PriceResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            symbol:
+              type: string
+              description: Cryptocurrency symbol
+            price:
+              type: number
+              format: float
+              description: Current price in USD
+            confidence:
+              type: number
+              format: float
+              minimum: 0
+              maximum: 1
+            sources:
+              type: array
+              items:
+                type: string
+            timestamp:
+              type: integer
+              format: int64
+            market_data:
+              type: object
+              properties:
+                market_cap:
+                  type: number
+                  format: float
+                volume_24h:
+                  type: number
+                  format: float
+                change_24h:
+                  type: number
+                  format: float
+        error:
+          type: string
+
+    WeatherResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            location:
+              type: string
+            temperature:
+              type: number
+              format: float
+              description: Temperature in Celsius
+            feels_like:
+              type: number
+              format: float
+            humidity:
+              type: integer
+              minimum: 0
+              maximum: 100
+              description: Humidity percentage
+            pressure:
+              type: number
+              format: float
+              description: Atmospheric pressure in hPa
+            visibility:
+              type: number
+              format: float
+              description: Visibility in kilometers
+            wind:
+              type: object
+              properties:
+                speed:
+                  type: number
+                  format: float
+                  description: Wind speed in km/h
+                direction:
+                  type: integer
+                  minimum: 0
+                  maximum: 360
+                  description: Wind direction in degrees
+            weather:
+              type: object
+              properties:
+                main:
+                  type: string
+                description:
+                  type: string
+                icon:
+                  type: string
+            confidence:
+              type: number
+              format: float
+            sources:
+              type: array
+              items:
+                type: string
+            timestamp:
+              type: integer
+              format: int64
+        error:
+          type: string
+
+    ProvidersResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            total_providers:
+              type: integer
+            active_providers:
+              type: integer
+            providers:
+              type: array
+              items:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  weight:
+                    type: number
+                    format: float
+                  reliability:
+                    type: number
+                    format: float
+                  latency:
+                    type: integer
+                    description: Average latency in milliseconds
+                  healthy:
+                    type: boolean
+                  metrics:
+                    type: object
+                    properties:
+                      total_queries:
+                        type: integer
+                      successful_queries:
+                        type: integer
+                      success_rate:
+                        type: number
+                        format: float
+                      average_latency:
+                        type: integer
+                      last_health_check:
+                        type: integer
+                        format: int64
+        error:
+          type: string
+
+    SystemStatusResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            system:
+              type: object
+              properties:
+                total_providers:
+                  type: integer
+                active_providers:
+                  type: integer
+                system_health:
+                  type: number
+                  format: float
+                last_check:
+                  type: integer
+                  format: int64
+            providers:
+              type: array
+              items:
+                type: object
+            health_status:
+              type: object
+              additionalProperties:
+                type: boolean
+            chatbots:
+              type: object
+              nullable: true
+            uptime:
+              type: number
+              format: float
+              description: System uptime percentage
+            timestamp:
+              type: string
+              format: date-time
+        error:
+          type: string
+
+    HealthCheckResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            timestamp:
+              type: integer
+              format: int64
+            results:
+              type: object
+              additionalProperties:
+                type: object
+                properties:
+                  healthy:
+                    type: boolean
+                  response_time:
+                    type: integer
+                    nullable: true
+                  last_error:
+                    type: string
+                    nullable: true
+        error:
+          type: string
+
+    BatchQueryItem:
+      type: object
+      properties:
+        query:
+          type: string
+        sources:
+          type: array
+          items:
+            type: string
+        method:
+          type: string
+        timeout:
+          type: integer
+      required:
+        - query
+
+    BatchQueryResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            total_queries:
+              type: integer
+            successful_queries:
+              type: integer
+            failed_queries:
+              type: integer
+            results:
+              type: array
+              items:
+                type: object
+                properties:
+                  query:
+                    type: string
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                  error:
+                    type: string
+                  execution_time_ms:
+                    type: integer
+        error:
+          type: string
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: string
+          description: Error message
+        code:
+          type: string
+          description: Error code
+        timestamp:
+          type: integer
+          format: int64
+          description: Error timestamp
+      required:
+        - success
+        - error
