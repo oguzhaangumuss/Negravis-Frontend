@@ -24,8 +24,8 @@
 :root.dark {
   --swagger-bg: #0f172a;
   --swagger-card-bg: #1e293b;
-  --swagger-text: #f8fafc;
-  --swagger-text-secondary: #cbd5e1;
+  --swagger-text: #ffffff;
+  --swagger-text-secondary: #e2e8f0;
   --swagger-border: #334155;
   --swagger-header-bg: #1e293b;
   --swagger-button-bg: #3b82f6;
@@ -68,6 +68,13 @@
 
 .swagger-ui .info .description {
   color: var(--swagger-text-secondary) !important;
+  line-height: 1.6 !important;
+}
+
+.swagger-ui .info .description p,
+.swagger-ui .info .description li {
+  color: var(--swagger-text-secondary) !important;
+  margin-bottom: 8px !important;
 }
 
 .swagger-ui .info .description h2 {
@@ -425,6 +432,46 @@
 .swagger-ui table td {
   color: var(--swagger-text-secondary) !important;
   border-bottom: 1px solid var(--swagger-border) !important;
+}
+
+/* Enhanced Text Styles for Better Readability */
+.swagger-ui .info ul li,
+.swagger-ui .info ol li,
+.swagger-ui .info p {
+  color: var(--swagger-text-secondary) !important;
+  line-height: 1.7 !important;
+  margin-bottom: 12px !important;
+}
+
+.swagger-ui .info ul,
+.swagger-ui .info ol {
+  padding-left: 20px !important;
+  margin: 16px 0 !important;
+}
+
+.swagger-ui .info ul li::marker,
+.swagger-ui .info ol li::marker {
+  color: var(--swagger-highlight) !important;
+}
+
+.swagger-ui .info strong,
+.swagger-ui .info b {
+  color: var(--swagger-text) !important;
+  font-weight: 600 !important;
+}
+
+/* Authentication and other sections */
+.swagger-ui .auth-container p,
+.swagger-ui .auth-container li {
+  color: var(--swagger-text-secondary) !important;
+}
+
+.swagger-ui .description p,
+.swagger-ui .description li,
+.swagger-ui .renderedMarkdown p,
+.swagger-ui .renderedMarkdown li {
+  color: var(--swagger-text-secondary) !important;
+  line-height: 1.6 !important;
 }
 
 /* Enhanced Animations */

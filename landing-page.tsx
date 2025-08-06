@@ -153,7 +153,7 @@ export default function Component() {
             </div>
             <ul className="flex space-x-6">
               <li><a href="#" className="hover:text-gray-300">Home</a></li>
-              <li><a href="/api-docs" target="_blank" className="hover:text-gray-300">API Documentation</a></li>
+              <li><a href="/api-docs" className="hover:text-gray-300">API Documentation</a></li>
               <li><a href="#" className="hover:text-gray-300">Analytics</a></li>
               <li><a href="#" className="hover:text-gray-300">Oracle</a></li>
               <li><a href="https://github.com/oguzhaangumuss/Negravis" target="_blank" className="hover:text-gray-300">Github</a></li>
@@ -167,7 +167,7 @@ export default function Component() {
             <a href="/dapp" className="bg-white text-black font-bold py-3 px-8 rounded-md hover:bg-gray-200 transition duration-300 inline-block">
               Launch dApp
             </a>
-            <a href="/api-docs" target="_blank" className="border border-white/30 text-white font-semibold py-3 px-6 rounded-md hover:bg-white/10 transition duration-300 inline-block">
+            <a href="/api-docs" className="border border-white/30 text-white font-semibold py-3 px-6 rounded-md hover:bg-white/10 transition duration-300 inline-block">
               View API Documentation
             </a>
           </div>
