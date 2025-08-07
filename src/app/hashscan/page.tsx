@@ -82,15 +82,65 @@ function HashscanPageContent() {
       if (result.success && result.data) {
         setTransactionResult(result.data)
         
-        // If transaction has oracle_data, also try to get full query result
+        // Check for Oracle data from backend API response
         if (result.data.oracle_data) {
+          console.log('🔍 Found Oracle data in backend response:', result.data.oracle_data)
+          
+          const oracleData = result.data.oracle_data
+          const mockQueryResult = {
+            query: oracleData.query || 'Unknown Query',
+            answer: oracleData.answer || `$${oracleData.value?.toLocaleString()}` || 'N/A',
+            value: oracleData.value || 0,
+            confidence: oracleData.confidence || 1,
+            method: oracleData.method || 'median',
+            sources: oracleData.sources || [],
+            provider: oracleData.provider || 'unknown',
+            timestamp: result.data.timestamp,
+            blockchain_hash: result.data.blockchain_hash || result.data.id,
+            blockchain_link: result.data.explorer_url,
+            data_sources: (oracleData.raw_responses || []).map((response: any, index: number) => ({
+              name: response.source || `Source ${index + 1}`,
+              type: 'API',
+              weight: '1.0',
+              confidence: Math.round((response.confidence || 0.95) * 100) + '%'
+            }))
+          }
+          
+          setQueryResult(mockQueryResult)
+        }
+        
+        // Fallback: If transaction has HCS data but no oracle_data in response
+        else if (result.data.details?.hcs_data) {
           try {
-            const queryResult = await oracleApi.searchHashscan(result.data.oracle_data.query || transactionId)
-            if (queryResult.success && queryResult.data) {
-              setQueryResult(queryResult.data)
+            const hcsData = result.data.details.hcs_data
+            console.log('🔍 Parsing HCS Oracle data directly:', hcsData)
+            
+            // Handle different HCS data structures
+            const oracleResult = hcsData.result || hcsData.data || {}
+            const queryInfo = hcsData.query_info || {}
+            
+            const mockQueryResult = {
+              query: hcsData.query || queryInfo.query || 'Unknown Query',
+              answer: queryInfo.answer || `$${oracleResult.value?.toLocaleString()}` || oracleResult.value?.toString() || 'N/A',
+              value: oracleResult.value || 0,
+              confidence: oracleResult.confidence || 1,
+              method: oracleResult.method || 'median',
+              sources: oracleResult.sources || [],
+              provider: (oracleResult.sources && oracleResult.sources[0]) || 'unknown',
+              timestamp: hcsData.timestamp || result.data.timestamp,
+              blockchain_hash: result.data.blockchain_hash || result.data.id,
+              blockchain_link: result.data.explorer_url,
+              data_sources: (oracleResult.raw_responses || []).map((response: any, index: number) => ({
+                name: response.source || `Source ${index + 1}`,
+                type: 'API',
+                weight: '1.0',
+                confidence: Math.round((response.confidence || 0.95) * 100) + '%'
+              }))
             }
-          } catch (queryErr) {
-            console.log('Could not fetch additional query data:', queryErr)
+            
+            setQueryResult(mockQueryResult)
+          } catch (parseErr) {
+            console.log('Error parsing HCS Oracle data:', parseErr)
           }
         }
       } else {
