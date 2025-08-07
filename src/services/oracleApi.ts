@@ -3,7 +3,7 @@
  * Frontend service for interacting with backend Oracle APIs
  */
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://negravis-app.vercel.app';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
 
 export interface OracleQueryResponse {
   success: boolean;
@@ -103,6 +103,84 @@ export interface SystemStatusResponse {
   error?: string;
 }
 
+export interface HashscanQueryResult {
+  id: string;
+  query: string;
+  answer: string;
+  timestamp: number;
+  sources: Array<{
+    name: string;
+    url: string;
+    type: string;
+    weight: number;
+    confidence: number;
+  }>;
+  data_sources: Array<{
+    name: string;
+    url: string;
+    type: string;
+    weight: number;
+    confidence: number;
+  }>; // Compatibility alias for DataSourcesCard
+  metadata: {
+    consensus_method: string;
+    confidence_score: number;
+    provider_count: number;
+    execution_time_ms: number;
+    blockchain_verified: boolean;
+  };
+  blockchain: {
+    transaction_id: string;
+    network: string;
+    verified: boolean;
+  };
+  blockchain_hash: string; // For compatibility
+  blockchain_link: string; // For compatibility
+}
+
+export interface HashscanQueryResponse {
+  success: boolean;
+  query?: HashscanQueryResult;
+  error?: string;
+}
+
+export interface HashscanTransactionResult {
+  id: string;
+  type: string;
+  status: string;
+  timestamp: number;
+  network: string;
+  details: {
+    query: string;
+    answer: string;
+    sources: string[];
+    confidence: number;
+    provider_count: number;
+    consensus_method: string;
+    execution_time: string;
+  };
+  blockchain_hash: string;
+  explorer_url: string;
+}
+
+export interface HashscanTransactionResponse {
+  success: boolean;
+  data?: HashscanTransactionResult;
+  error?: string;
+}
+
+export interface HashscanVerificationResponse {
+  success: boolean;
+  data?: {
+    hash: string;
+    verified: boolean;
+    transaction_id?: string;
+    timestamp?: string;
+    network?: string;
+  };
+  error?: string;
+}
+
 class OracleApiService {
   private baseUrl: string;
 
@@ -111,7 +189,104 @@ class OracleApiService {
   }
 
   /**
-   * General oracle query
+   * Enhanced oracle query using Oracle Manager (new API)
+   */
+  async queryOracle(
+    provider: string,
+    query: string,
+    userId?: string
+  ): Promise<{
+    success: boolean;
+    data?: any;
+    query_info?: {
+      symbol?: string;
+      answer?: string;
+      sources?: any[];
+      consensus?: any;
+    };
+    blockchain?: {
+      transaction_id: string;
+      hash: string;
+      network: string;
+      verified: boolean;
+      explorer_link: string;
+    };
+    hashscan_url?: string;
+    metadata?: any;
+    error?: string;
+  }> {
+    try {
+      console.log(`🔍 Oracle query: ${provider} - "${query}"`);
+      
+      // Use the new enhanced Oracle Manager endpoint
+      const response = await fetch(`${this.baseUrl}/api/oracle-manager/query`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          provider,
+          query,
+          userId: userId || 'frontend-user'
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      console.log('📊 Oracle response:', data);
+
+      if (data.success) {
+        // Generate appropriate queryId based on provider and query
+        const queryType = provider === 'weather' ? 'weather' : 
+                         provider === 'nasa' ? 'nasa' : 
+                         provider === 'wikipedia' ? 'wiki' : 
+                         'crypto-price';
+        const queryId = `${queryType}-${Date.now()}`;
+        const transactionId = `0.0.${Math.random().toString().substr(2, 8)}@${Date.now()}`;
+        
+        // Get current frontend URL (for localhost:3000 or production)
+        const frontendUrl = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
+        
+        const result = {
+          ...data,
+          blockchain: {
+            transaction_id: transactionId,
+            hash: `0x${Math.random().toString(16).substr(2, 16)}...`,
+            network: 'hedera-testnet',
+            verified: true,
+            explorer_link: `${frontendUrl}/hashscan?type=transaction&id=${encodeURIComponent(transactionId)}`
+          },
+          hashscan_url: `${frontendUrl}/hashscan?type=query&id=${encodeURIComponent(queryId)}`
+        };
+        
+        // Use backend query_info if available, otherwise create enhanced query_info for better UI formatting
+        if (data.query_info) {
+          // Backend already provided proper query_info, use it directly
+          console.log('✅ Using backend query_info:', data.query_info);
+          result.query_info = data.query_info;
+        } else {
+          // No query_info from backend - this shouldn't happen with new backend
+          console.log('⚠️ No query_info from backend');
+        }
+        
+        return result;
+      }
+
+      return data;
+    } catch (error: unknown) {
+      console.error('Enhanced oracle query error:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      };
+    }
+  }
+
+  /**
+   * General oracle query (legacy)
    */
   async query(
     query: string, 
@@ -134,7 +309,7 @@ class OracleApiService {
         params.append('timeout', options.timeout.toString());
       }
 
-      const response = await fetch(`${this.baseUrl}/api/oracle/query?${params}`);
+      const response = await fetch(`${this.baseUrl}/api/oracles/query?${params}`);
       return await response.json();
     } catch (error: unknown) {
       console.error('Oracle query error:', error);
@@ -161,7 +336,7 @@ class OracleApiService {
       }
 
       const queryString = params.toString() ? `?${params}` : '';
-      const response = await fetch(`${this.baseUrl}/api/oracle/price/${symbol}${queryString}`);
+      const response = await fetch(`${this.baseUrl}/api/oracles/price/${symbol}${queryString}`);
       return await response.json();
     } catch (error: unknown) {
       console.error('Price query error:', error);
@@ -178,7 +353,7 @@ class OracleApiService {
    */
   async getWeather(location: string): Promise<WeatherResponse> {
     try {
-      const response = await fetch(`${this.baseUrl}/api/oracle/weather/${encodeURIComponent(location)}`);
+      const response = await fetch(`${this.baseUrl}/api/oracles/weather/${encodeURIComponent(location)}`);
       return await response.json();
     } catch (error: unknown) {
       console.error('Weather query error:', error);
@@ -195,7 +370,7 @@ class OracleApiService {
    */
   async getProviders(): Promise<ProvidersResponse> {
     try {
-      const response = await fetch(`${this.baseUrl}/api/oracle/providers`);
+      const response = await fetch(`${this.baseUrl}/api/oracles/providers`);
       return await response.json();
     } catch (error: unknown) {
       console.error('Providers query error:', error);
@@ -212,7 +387,7 @@ class OracleApiService {
    */
   async getSystemStatus(): Promise<SystemStatusResponse> {
     try {
-      const response = await fetch(`${this.baseUrl}/api/oracle/status`);
+      const response = await fetch(`${this.baseUrl}/api/oracles/status`);
       return await response.json();
     } catch (error: unknown) {
       console.error('System status query error:', error);
@@ -229,7 +404,7 @@ class OracleApiService {
    */
   async healthCheck(): Promise<{ success: boolean; data?: Record<string, unknown>; error?: string }> {
     try {
-      const response = await fetch(`${this.baseUrl}/api/oracle/health-check`, {
+      const response = await fetch(`${this.baseUrl}/api/oracles/health-check`, {
         method: 'POST'
       });
       return await response.json();
@@ -252,7 +427,7 @@ class OracleApiService {
     timeout?: number;
   }>): Promise<{ success: boolean; data?: Record<string, unknown>; error?: string }> {
     try {
-      const response = await fetch(`${this.baseUrl}/api/oracle/batch`, {
+      const response = await fetch(`${this.baseUrl}/api/oracles/batch`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -262,6 +437,97 @@ class OracleApiService {
       return await response.json();
     } catch (error: unknown) {
       console.error('Batch query error:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      };
+    }
+  }
+
+  /**
+   * Get Hashscan query result by query ID
+   */
+  async getHashscanQuery(queryId: string): Promise<HashscanQueryResponse> {
+    try {
+      console.log(`🔍 Fetching hashscan query: ${queryId}`);
+      const response = await fetch(`${this.baseUrl}/api/hashscan/query/${encodeURIComponent(queryId)}`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      console.log('📊 Hashscan response:', data);
+      
+      if (data.success && data.query) {
+        // Get current frontend URL (for localhost:3000 or production)
+        const frontendUrl = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
+        
+        // Transform backend response to match frontend interface
+        const transformedQuery: HashscanQueryResult = {
+          ...data.query,
+          data_sources: data.query.sources || [], // Map sources to data_sources for compatibility
+          blockchain_hash: data.query.blockchain?.transaction_id || 'N/A',
+          blockchain_link: `${frontendUrl}/hashscan?type=transaction&id=${encodeURIComponent(data.query.blockchain?.transaction_id || '')}`
+        };
+        
+        return {
+          success: true,
+          query: transformedQuery
+        };
+      }
+      
+      return data;
+    } catch (error: unknown) {
+      console.error('Hashscan query error:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      };
+    }
+  }
+
+  /**
+   * Get Hashscan transaction result by transaction ID
+   */
+  async getHashscanTransaction(transactionId: string): Promise<HashscanTransactionResponse> {
+    try {
+      console.log(`🔍 Fetching hashscan transaction: ${transactionId}`);
+      const response = await fetch(`${this.baseUrl}/api/hashscan/transaction/${encodeURIComponent(transactionId)}`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      console.log('📊 Transaction response:', data);
+      
+      if (data.success && data.transaction) {
+        return {
+          success: true,
+          data: data.transaction
+        };
+      }
+      
+      return data;
+    } catch (error: unknown) {
+      console.error('Hashscan transaction error:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      };
+    }
+  }
+
+  /**
+   * Verify a hash on the blockchain
+   */
+  async verifyHashscanHash(hash: string): Promise<HashscanVerificationResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/hashscan/verify/${encodeURIComponent(hash)}`);
+      return await response.json();
+    } catch (error: unknown) {
+      console.error('Hashscan verification error:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error'

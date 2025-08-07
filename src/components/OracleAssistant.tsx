@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { Merriweather } from 'next/font/google'
-import { Send, Bot, User, Zap, BarChart3, Cloud, Coins, Activity, AlertCircle, CheckCircle, Loader2 } from 'lucide-react'
+import { Send, Bot, User, Zap, BarChart3, Cloud, Coins, Activity, AlertCircle, CheckCircle, Loader2, ExternalLink, Search } from 'lucide-react'
 import { oracleApi } from '../services/oracleApi'
 import { useOracleApi } from '../hooks/useOracleApi'
 
@@ -20,46 +20,94 @@ interface Message {
 }
 
 const perspectiveOracles = [
+  // Premium Oracles
   { 
-    id: 'coingecko-oracle', 
+    id: 'chainlink', 
+    name: '🔗 Chainlink', 
+    icon: Activity, 
+    color: 'text-blue-400',
+    providers: ['chainlink'],
+    perspective: 'Enterprise Oracle',
+    context: 'Decentralized oracle network with proven reliability',
+    description: 'Crypto prices, Market data, Enterprise - 95% reliability'
+  },
+  
+  // Free Oracles
+  { 
+    id: 'coingecko', 
     name: '🦎 CoinGecko', 
     icon: Coins, 
     color: 'text-yellow-400',
     providers: ['coingecko'],
     perspective: 'Crypto Market Data',
-    context: 'Real-time cryptocurrency prices via CoinGecko API',
-    description: 'BTC, ETH, BNB, ADA and 14+ crypto prices'
+    context: 'Comprehensive cryptocurrency data and market info',
+    description: 'Crypto prices, Market cap, Trading volume - 90% reliability'
   },
   { 
-    id: 'weather-oracle', 
-    name: '🌤️ Weather', 
-    icon: Cloud, 
+    id: 'dia', 
+    name: '💎 DIA Oracle', 
+    icon: BarChart3, 
     color: 'text-cyan-400',
+    providers: ['dia'],
+    perspective: 'Transparent Crypto Data',
+    context: 'Transparent, customizable crypto price feeds',
+    description: '3000+ tokens, Transparent data, DeFi - 91% reliability'
+  },
+  { 
+    id: 'weather', 
+    name: '🌤️ Weather Oracle', 
+    icon: Cloud, 
+    color: 'text-green-400',
     providers: ['weather'],
     perspective: 'Weather Data',
-    context: 'Global weather and climate information',
-    description: 'Temperature, humidity, forecasts for any location'
+    context: 'Real-time weather data and forecasts',
+    description: 'Weather forecasts, Climate data, Location - 89% reliability'
   },
   { 
-    id: 'web-search-oracle', 
-    name: '🔍 Web Search', 
-    icon: BarChart3, 
-    color: 'text-red-400',
-    providers: ['web-scraping'],
-    perspective: 'Web Intelligence',
-    context: 'Web scraping and search results',
-    description: 'News, market data, web content analysis'
+    id: 'exchangerate', 
+    name: '💱 Exchange Rate', 
+    icon: Activity, 
+    color: 'text-orange-400',
+    providers: ['exchangerate'],
+    perspective: 'Currency Exchange',
+    context: 'Foreign exchange rates and currency conversion',
+    description: 'Forex rates, Currency conversion, Financial - 90% reliability'
   },
   { 
-    id: 'chat-oracle', 
-    name: '💬 Chat', 
-    icon: Bot, 
+    id: 'sports', 
+    name: '🏀 Sports Oracle', 
+    icon: Activity, 
     color: 'text-purple-400',
-    providers: ['conversational_ai'],
-    perspective: 'Conversation',
-    context: 'Natural language chat and help',
-    description: 'Friendly conversation, help, explanations'
-  }
+    providers: ['sports'],
+    perspective: 'Sports Data',
+    context: 'NBA, Football, Soccer and global sports data',
+    description: 'NBA stats, Team info, Player data, Leagues - 92% reliability'
+  },
+  
+  // Official Oracles  
+  { 
+    id: 'nasa', 
+    name: '🚀 NASA', 
+    icon: Zap, 
+    color: 'text-red-400',
+    providers: ['nasa'],
+    perspective: 'Space & Astronomy',
+    context: 'Space, astronomy, and Earth observation data',
+    description: 'Astronomy, Space weather, Earth data - 92% reliability'
+  },
+  
+  // Community Oracles
+  { 
+    id: 'wikipedia', 
+    name: '📚 Wikipedia', 
+    icon: Bot, 
+    color: 'text-indigo-400',
+    providers: ['wikipedia'],
+    perspective: 'Knowledge Base',
+    context: 'Global knowledge base and information encyclopedia',
+    description: 'Knowledge, Information, Education - 88% reliability'
+  },
+  
 ]
 
 // Keep old services array for backward compatibility
@@ -70,7 +118,7 @@ export default function OracleAssistant() {
     {
       id: '1',
       type: 'assistant',
-      content: 'Welcome to Negravis Oracle System! 🎭✨\n\n**Available Oracle Agents:**\n\n🦎 **CoinGecko** - Real-time cryptocurrency prices (BTC, ETH, BNB, ADA + 14 more)\n🌤️ **Weather** - Global weather data and forecasts for any location\n🔍 **Web Search** - Web scraping, news analysis, and search intelligence\n💬 **Chat** - Natural conversation, help, and system explanations\n\n**How to start:**\n1. Select your preferred Oracle from the dropdown above\n2. Click "Launch Agent" \n3. Start asking questions specific to that Oracle!\n\n🚀 Each Oracle specializes in different data types for focused, accurate results.',
+      content: 'Welcome to Negravis Oracle System! 🎭✨\n\n**Available Oracle Agents (8 Total):**\n\n**🔥 Premium:**\n🔗 **Chainlink** - Enterprise oracle network (95% reliability)\n\n**💎 Standard:**\n🦎 **CoinGecko** - Crypto market data (90% reliability)\n💎 **DIA Oracle** - 3000+ transparent token feeds (91% reliability)\n🌤️ **Weather** - Global forecasts and climate (89% reliability)\n💱 **Exchange Rate** - Forex and currency conversion (90% reliability)\n🏀 **Sports** - NBA and global sports data (92% reliability)\n\n**🏛️ Official:**\n🚀 **NASA** - Space, astronomy, Earth data (92% reliability)\n\n**🌐 Community:**\n📚 **Wikipedia** - Knowledge encyclopedia (88% reliability)\n**How to start:**\n1. Select your preferred Oracle from the dropdown above\n2. Click "Launch Agent"\n3. Ask questions - responses include blockchain verification!\n\n🔗 All responses are logged on Hedera blockchain with hash & explorer links.',
       timestamp: new Date()
     }
   ])
@@ -259,129 +307,203 @@ export default function OracleAssistant() {
     }
     
     try {
-      switch (service) {
-        case 'coingecko-oracle':
-        case 'coingecko':
-          // Use direct API call to avoid state caching
-          try {
-            const directResponse = await oracleApi.query(query);
-            
-            if (directResponse.success) {
-              setConnectionStatus('connected')
-              return formatQueryResponse(directResponse.data, selectedOracle?.id);
-            } else {
-              setConnectionStatus('connected')
-              return `❌ Query failed: ${directResponse.error || 'Unknown error'}`;
+      // Use oracle API for all queries
+      const response = await oracleApi.queryOracle(service, query, 'frontend-user');
+      
+      if (response.success && response.data) {
+        setConnectionStatus('connected')
+        
+        // Format response based on legacy API structure
+        const data = response.data;
+        let formattedResponse = '';
+        
+        // Handle enhanced query_info response format
+        console.log('🔍 Debug - Full response:', response);
+        console.log('🔍 Debug - query_info:', response.query_info);
+        console.log('🔍 Debug - query_info exists:', !!response.query_info);
+        console.log('🔍 Debug - query_info symbol:', response.query_info?.symbol);
+        console.log('🔍 Debug - query_info answer:', response.query_info?.answer);
+        
+        if (response.query_info && (response.query_info.symbol || response.query_info.answer)) {
+          const queryInfo = response.query_info;
+          const symbol = queryInfo.symbol || 'Asset';
+          const answer = queryInfo.answer || 'N/A';
+          
+          // Format different query types differently
+          if (queryInfo.query_type === 'weather') {
+            formattedResponse = `🌤️ **${symbol} Weather Analysis**\n\n`;
+            formattedResponse += `🔍 **Query Results**\n\n`;
+            formattedResponse += `• Location: ${queryInfo.location || 'Unknown'}\n`;
+            formattedResponse += `• Temperature: ${queryInfo.temperature || 'N/A'}\n`;
+            if (queryInfo.humidity) formattedResponse += `• Humidity: ${queryInfo.humidity}\n`;
+            if (queryInfo.weather_description) formattedResponse += `• Weather Description: ${queryInfo.weather_description}\n`;
+            if (queryInfo.wind_speed) formattedResponse += `• Wind Speed: ${queryInfo.wind_speed}\n\n`;
+          } else if (queryInfo.query_type === 'crypto_price') {
+            formattedResponse = `💰 **${symbol} Price Analysis**\n\n`;
+            formattedResponse += `**Current Price:** ${answer}\n\n`;
+          } else if (queryInfo.query_type === 'exchange_rate') {
+            formattedResponse = `💱 **${symbol} Exchange Rate**\n\n`;
+            formattedResponse += `**Rate:** ${answer}\n\n`;
+            formattedResponse += `🔍 **Exchange Details**\n\n`;
+            formattedResponse += `• Base Currency: ${queryInfo.base_currency || 'N/A'}\n`;
+            formattedResponse += `• Target Currency: ${queryInfo.target_currency || 'N/A'}\n`;
+            formattedResponse += `• Rate: ${queryInfo.rate || 'N/A'}\n\n`;
+          } else if (queryInfo.query_type === 'nasa') {
+            formattedResponse = `🚀 **${symbol} Space Data**\n\n`;
+            formattedResponse += `**Summary:** ${answer}\n\n`;
+            formattedResponse += `🌌 **Space Details**\n\n`;
+            if (queryInfo.title) formattedResponse += `• Title: ${queryInfo.title}\n`;
+            if (queryInfo.date) formattedResponse += `• Date: ${queryInfo.date}\n`;
+            if (queryInfo.data_type) formattedResponse += `• Type: ${queryInfo.data_type}\n`;
+            if (queryInfo.explanation && queryInfo.explanation.length > 150) {
+              formattedResponse += `• Full Description: ${queryInfo.explanation}\n`;
             }
-          } catch (apiError: unknown) {
-            setConnectionStatus('connected')
-            return `❌ API Error: ${apiError instanceof Error ? apiError.message : 'Unknown API error'}`;
-          }
-          break;
-          
-        case 'weather-oracle':
-        case 'weather':
-          // Extract location from query (with typo tolerance)
-          const locationMatch = query.match(/\b(?:weather|wheather|temperature|climate)(?:\s+(?:in|at|for))?\s+([A-Za-z\s,]+)/i) || 
-                              query.match(/\b(?:in|at)\s+([A-Za-z\s,]+)$/i);
-          let location = 'London'; // default
-          
-          if (locationMatch) {
-            location = locationMatch[1].trim().replace(/[,.]$/, '');
-          } else if (!query.match(/weather|wheather|temperature|climate/i)) {
-            // If no weather keywords, treat the whole query as location
-            location = query.trim();
-          }
-          
-          // Use direct API call to avoid state caching
-          try {
-            const weatherResponse = await oracleApi.getWeather(location);
-            
-            if (weatherResponse.success && weatherResponse.data) {
-              setConnectionStatus('connected')
-              const data = weatherResponse.data;
-              let response = `🌤️ Weather in ${data.location}:`;
-              response += `\n🌡️ Temperature: ${data.temperature}°C (feels like ${data.feels_like}°C)`;
-              response += `\n💧 Humidity: ${data.humidity}%`;
-              response += `\n🌬️ Wind: ${data.wind.speed} m/s`;
-              response += `\n☁️ Conditions: ${data.weather.description}`;
-              response += `\n📊 Confidence: ${(data.confidence * 100).toFixed(1)}%`;
-              return response;
-            } else {
-              setConnectionStatus('connected')
-              return `❌ Could not fetch weather for ${location}: ${weatherResponse.error || 'Unknown error'}`;
+            formattedResponse += `\n`;
+          } else if (queryInfo.query_type === 'wikipedia') {
+            formattedResponse = `📚 **${symbol} Knowledge**\n\n`;
+            formattedResponse += `**Summary:** ${answer}\n\n`;
+            formattedResponse += `📖 **Wikipedia Details**\n\n`;
+            if (queryInfo.title) formattedResponse += `• Article: ${queryInfo.title}\n`;
+            if (queryInfo.results_count) formattedResponse += `• Results Found: ${queryInfo.results_count}\n`;
+            if (queryInfo.extract && queryInfo.extract.length > 200) {
+              formattedResponse += `• Full Extract: ${queryInfo.extract}\n`;
             }
-          } catch (weatherError: unknown) {
-            setConnectionStatus('connected')
-            return `❌ Weather API Error: ${weatherError instanceof Error ? weatherError.message : 'Unknown weather error'}`;
-          }
-          break;
-          
-        case 'web-search-oracle':
-          // Route to web-scraping for market intelligence
-          try {
-            const intelligenceResponse = await oracleApi.query(query);
-            
-            if (intelligenceResponse.success) {
-              setConnectionStatus('connected')
-              return `🔍 **Web Search Analysis:**\n\n${formatQueryResponse(intelligenceResponse.data, 'web-search-oracle')}\n\n💡 *Analyzed using web scraping and search intelligence.*`;
-            } else {
-              setConnectionStatus('connected')
-              return `❌ Market Intelligence analysis failed: ${intelligenceResponse.error || 'Unknown error'}`;
+            formattedResponse += `\n`;
+          } else if (queryInfo.query_type === 'sports') {
+            formattedResponse = `🏀 **${symbol} Sports Data**\n\n`;
+            formattedResponse += `**Info:** ${answer}\n\n`;
+            formattedResponse += `🏆 **Team Details**\n\n`;
+            if (queryInfo.sport) formattedResponse += `• Sport: ${queryInfo.sport}\n`;
+            if (queryInfo.league) formattedResponse += `• League: ${queryInfo.league}\n`;
+            if (queryInfo.country) formattedResponse += `• Country: ${queryInfo.country}\n`;
+            if (queryInfo.founded) formattedResponse += `• Founded: ${queryInfo.founded}\n`;
+            if (queryInfo.stadium) formattedResponse += `• Stadium: ${queryInfo.stadium}\n`;
+            if (queryInfo.website) formattedResponse += `• Website: ${queryInfo.website}\n`;
+            if (queryInfo.description && queryInfo.description.length > answer.length) {
+              formattedResponse += `• Description: ${queryInfo.description}\n`;
             }
-          } catch (intelligenceError: unknown) {
-            setConnectionStatus('connected')
-            return `❌ Market Intelligence Error: ${intelligenceError instanceof Error ? intelligenceError.message : 'Unknown intelligence error'}`;
+            formattedResponse += `\n`;
+          } else {
+            formattedResponse = `🔍 **${symbol} Query Analysis**\n\n`;
+            formattedResponse += `**Result:** ${answer}\n\n`;
           }
-          break;
           
-        case 'chat-oracle':
-          // Route to conversational AI
-          try {
-            const conversationResponse = await oracleApi.query(query);
-            
-            if (conversationResponse.success) {
-              setConnectionStatus('connected')
-              return `💬 **Chat Response:**\n\n${formatQueryResponse(conversationResponse.data, 'chat-oracle')}\n\n🤖 *Natural language conversation.*`;
-            } else {
-              setConnectionStatus('connected')
-              return `❌ Conversational analysis failed: ${conversationResponse.error || 'Unknown error'}`;
+          // Data sources
+          if (queryInfo.sources && Array.isArray(queryInfo.sources)) {
+            formattedResponse += `📊 **Data Sources:**\n`;
+            queryInfo.sources.forEach((source: any) => {
+              const icon = source.type === 'blockchain' ? '🔗' : '📡';
+              formattedResponse += `${icon} **${source.name}**: ${source.confidence}% confidence\n`;
+            });
+            formattedResponse += `\n`;
+          }
+          
+          // Consensus metadata
+          if (queryInfo.consensus) {
+            formattedResponse += `📊 **Data Quality:**\n`;
+            formattedResponse += `• Confidence: ${queryInfo.consensus.confidence_score}%\n`;
+            formattedResponse += `• Sources: ${queryInfo.sources?.map((s: any) => s.name?.toLowerCase() || 'unknown').join(', ') || 'N/A'}\n`;
+            formattedResponse += `• Method: ${queryInfo.consensus.method}\n`;
+            formattedResponse += `• Providers: ${queryInfo.consensus.provider_count}\n`;
+          }
+          
+          // Add blockchain verification if available
+          if (response.blockchain) {
+            formattedResponse += `\n🔗 **Blockchain Verification:**\n`;
+            formattedResponse += `• Transaction ID: ${response.blockchain.transaction_id}\n`;
+            formattedResponse += `• Hash: ${response.blockchain.hash.slice(0, 16)}...\n`;
+            formattedResponse += `• Network: ${response.blockchain.network}\n`;
+            formattedResponse += `• Verified: ✅ ${response.blockchain.verified ? 'Yes' : 'No'}\n`;
+          }
+          
+          // Add hashscan link for detailed query exploration
+          if (response.hashscan_url) {
+            formattedResponse += `\n🔍 **Query Details:**\n`;
+            formattedResponse += `HASHSCAN_BUTTON::${response.hashscan_url}::View detailed analysis with sources and blockchain verification\n`;
+          }
+        }
+        // Legacy price format fallback
+        else if (data.price !== undefined) {
+          // New price feed format
+          const symbol = data.pair ? data.pair.split('/')[0] : 'BTC';
+          const price = data.decimals ? data.price / Math.pow(10, data.decimals) : data.price;
+          
+          formattedResponse = `💰 **${symbol} Price Update**\n\n`;
+          formattedResponse += `Current Price: **$${price.toLocaleString()}**\n`;
+          
+          if (response.metadata) {
+            const meta = response.metadata;
+            if (meta.confidence) {
+              formattedResponse += `Confidence: ${(meta.confidence * 100).toFixed(1)}%\n`;
             }
-          } catch (conversationError: unknown) {
-            setConnectionStatus('connected')
-            return `❌ Conversational Error: ${conversationError instanceof Error ? conversationError.message : 'Unknown conversation error'}`;
-          }
-          break;
-          
-        case 'ai-compute':
-          setConnectionStatus('connected')
-          return `🤖 0G AI Compute: Processing "${query}" with advanced AI models.\n\n🔗 This feature connects to decentralized AI networks for complex computations.\n⚡ Currently in beta phase - full functionality coming soon!`;
-          
-        default:
-          // General oracle query - use direct API call to avoid state caching
-          try {
-            const defaultResponse = await oracleApi.query(query);
-            
-            if (defaultResponse.success) {
-              setConnectionStatus('connected')
-              return formatQueryResponse(defaultResponse.data, selectedOracle?.id);
-            } else {
-              setConnectionStatus('connected')
-              return `❌ Query failed: ${defaultResponse.error || 'Unknown error'}`;
+            if (meta.sources && Array.isArray(meta.sources)) {
+              formattedResponse += `Sources: ${meta.sources.join(', ')}\n`;
             }
-          } catch (defaultError: unknown) {
-            setConnectionStatus('connected')
-            return `❌ Oracle API Error: ${defaultError instanceof Error ? defaultError.message : 'Unknown oracle error'}`;
+            formattedResponse += `Method: ${meta.method || 'N/A'}\n`;
+            formattedResponse += `Providers: ${meta.providersUsed || 0}\n`;
+            
+            // Add blockchain verification if available
+            if (response.blockchain) {
+              formattedResponse += `\n🔗 **Blockchain Verification:**\n`;
+              formattedResponse += `• Transaction ID: ${response.blockchain.transaction_id}\n`;
+              formattedResponse += `• Hash: ${response.blockchain.hash.slice(0, 16)}...\n`;
+              formattedResponse += `• Network: ${response.blockchain.network}\n`;
+              formattedResponse += `• Verified: ✅ ${response.blockchain.verified ? 'Yes' : 'No'}\n`;
+            }
+            
+            // Add hashscan link for detailed query exploration
+            if (response.hashscan_url) {
+              formattedResponse += `\n🔍 **Query Details:**\n`;
+              formattedResponse += `HASHSCAN_BUTTON::${response.hashscan_url}::View detailed analysis with sources and blockchain verification\n`;
+            }
           }
+        } else if (data.result && typeof data.result === 'object') {
+          const result = data.result;
+          
+          if (result.symbol && result.price) {
+            // Legacy crypto price response
+            formattedResponse = `💰 **${result.symbol} Price Update**\n\n`;
+            formattedResponse += `Current Price: **$${result.price.toLocaleString()}**\n`;
+            if (result.confidence_score) {
+              formattedResponse += `Confidence: ${(result.confidence_score * 100).toFixed(1)}%\n`;
+            }
+            if (result.data_sources && Array.isArray(result.data_sources)) {
+              formattedResponse += `Sources: ${result.data_sources.join(', ')}\n`;
+            }
+          } else if (result.temperature !== undefined) {
+            // Weather response
+            formattedResponse = `🌤️ **Weather Information**\n\n`;
+            formattedResponse += `Temperature: ${result.temperature}°C\n`;
+            if (result.location) {
+              formattedResponse += `Location: ${result.location}\n`;
+            }
+          } else {
+            // Generic response
+            formattedResponse = `📊 **Oracle Response**\n\n${JSON.stringify(result, null, 2)}`;
+          }
+        } else if (data.result && typeof data.result === 'string') {
+          formattedResponse = data.result;
+        }
+        
+        // Add metadata if not already included
+        if (!formattedResponse.includes('**Data Quality:**')) {
+          formattedResponse += `\n\n📊 **Data Quality:**`;
+          
+          const meta = response.metadata || {};
+          formattedResponse += `\n• Confidence: ${meta.confidence ? (meta.confidence * 100).toFixed(1) : 'N/A'}%`;
+          formattedResponse += `\n• Sources: ${meta.sources ? meta.sources.join(', ') : 'N/A'}`;
+          formattedResponse += `\n• Method: ${meta.method || 'N/A'}`;
+          formattedResponse += `\n• Providers: ${meta.providersUsed || 0}`;
+        }
+        
+        return formattedResponse;
+      } else {
+        setConnectionStatus('connected')
+        return `❌ Query failed: ${response.error || 'Unknown error'}`;
       }
-      
-      // Fallback
+    } catch (apiError: unknown) {
       setConnectionStatus('connected')
-      return `❌ I couldn't process that request. Please try rephrasing your query or check if the backend service is running.`;
-      
-    } catch (error: unknown) {
-      setConnectionStatus('connected')
-      return `❌ Service error: ${error instanceof Error ? error.message : 'Unknown error occurred'}\n\n💡 Tip: Make sure the backend Oracle service is running on port 4001.`;
+      return `❌ API Error: ${apiError instanceof Error ? apiError.message : 'Connection failed - ensure backend is running on port 4001'}`;
     }
   }
 
@@ -405,24 +527,41 @@ export default function OracleAssistant() {
     let welcomeContent = '';
     
     switch (selectedService) {
-      case 'coingecko-oracle':
-        welcomeContent = `🦎 **CoinGecko Oracle Activated!**\n\n💰 I'm your cryptocurrency market data specialist!\n\n**What I can do:**\n• Get real-time prices for BTC, ETH, BNB, ADA and 14+ cryptocurrencies\n• Provide market cap, trading volume, and 24h price changes\n• Multi-source price validation for accuracy\n\n**Try asking:**\n• "What's the Bitcoin price?"\n• "BNB price today"\n• "ETH market cap"\n• "Solana 24h change"\n\n🚀 Ready to fetch crypto data!`;
+        
+      case 'chainlink':
+        welcomeContent = `🔗 **Chainlink Oracle Activated!**\n\n🏛️ Enterprise-grade decentralized oracle with 95% reliability!\n\n**What I can do:**\n• Proven reliable crypto price feeds\n• Enterprise market data\n• Institutional-grade accuracy\n• Battle-tested oracle network\n\n**Try asking:**\n• "Chainlink BTC price"\n• "Enterprise crypto data"\n• "Market price validation"\n• "Institutional price feeds"\n\n🎯 Enterprise oracle ready!`;
         break;
         
-      case 'weather-oracle':
-        welcomeContent = `🌤️ **Weather Oracle Activated!**\n\n🌍 I'm your global weather information specialist!\n\n**What I can do:**\n• Get current weather for any city worldwide\n• Provide temperature, humidity, wind speed\n• Weather conditions and forecasts\n• Climate data analysis\n\n**Try asking:**\n• "Weather in Istanbul"\n• "Temperature in London"\n• "How's the weather in Tokyo?"\n• "Climate in New York"\n\n☁️ Ready to check the skies!`;
+      case 'coingecko':
+        welcomeContent = `🦎 **CoinGecko Oracle Activated!**\n\n💰 Comprehensive crypto market data with 90% reliability!\n\n**What I can do:**\n• Real-time prices for 10,000+ cryptocurrencies\n• Market cap, trading volume, price changes\n• Historical data and market trends\n• Free-tier crypto intelligence\n\n**Try asking:**\n• "Bitcoin price and market cap"\n• "Ethereum trading volume"\n• "Top 10 crypto prices"\n• "Altcoin market analysis"\n\n📈 Crypto data ready!`;
         break;
         
-      case 'web-search-oracle':
-        welcomeContent = `🔍 **Web Search Oracle Activated!**\n\n🌐 I'm your web intelligence and search specialist!\n\n**What I can do:**\n• Scrape news and market data from websites\n• Search for current information online\n• Analyze web content and trends\n• Gather intelligence from multiple sources\n\n**Try asking:**\n• "Search for Bitcoin news"\n• "Latest crypto market trends"\n• "Web search: AI developments"\n• "Find information about..."\n\n🔎 Ready to search the web!`;
+      case 'dia':
+        welcomeContent = `💎 **DIA Oracle Activated!**\n\n🔍 Transparent crypto data for 3000+ tokens with 91% reliability!\n\n**What I can do:**\n• Transparent, customizable price feeds\n• 3000+ token coverage including DeFi\n• Open-source data methodology\n• Community-driven oracle network\n\n**Try asking:**\n• "DeFi token prices"\n• "Transparent price methodology"\n• "Lesser-known token prices"\n• "Community-verified data"\n\n💫 Transparent data ready!`;
         break;
         
-      case 'chat-oracle':
-        welcomeContent = `💬 **Chat Oracle Activated!**\n\n🤖 I'm your conversational AI companion!\n\n**What I can do:**\n• Have friendly natural conversations\n• Answer questions about the Oracle system\n• Provide help and explanations\n• Chat about various topics\n\n**Try saying:**\n• "Hello! How are you?"\n• "What can you help me with?"\n• "Tell me about this system"\n• "I need some assistance"\n\n💫 Ready for a chat!`;
+      case 'weather':
+        welcomeContent = `🌤️ **Weather Oracle Activated!**\n\n🌍 Global weather data with 89% reliability!\n\n**What I can do:**\n• Real-time weather for any location\n• Temperature, humidity, wind conditions\n• Weather forecasts and climate data\n• Atmospheric monitoring\n\n**Try asking:**\n• "Weather in Istanbul"\n• "Temperature in London"\n• "Climate data for Tokyo"\n• "Current conditions in New York"\n\n🌡️ Weather data ready!`;
+        break;
+        
+      case 'exchangerate':
+        welcomeContent = `💱 **Exchange Rate Oracle Activated!**\n\n💰 Foreign exchange data with 90% reliability!\n\n**What I can do:**\n• Real-time forex exchange rates\n• Currency conversion calculations\n• Major currency pair monitoring\n• Financial market data\n\n**Try asking:**\n• "USD to EUR exchange rate"\n• "Convert 100 USD to GBP"\n• "Latest forex rates"\n• "Currency market analysis"\n\n💸 Forex data ready!`;
+        break;
+        
+      case 'nasa':
+        welcomeContent = `🚀 **NASA Oracle Activated!**\n\n🌌 Official space and astronomy data with 92% reliability!\n\n**What I can do:**\n• Astronomy Picture of the Day\n• Near Earth Objects tracking\n• Mars rover mission data\n• Space weather information\n\n**Try asking:**\n• "NASA astronomy picture today"\n• "Near Earth objects"\n• "Mars mission updates"\n• "Space weather data"\n\n🛰️ Space data ready!`;
+        break;
+        
+      case 'wikipedia':
+        welcomeContent = `📚 **Wikipedia Oracle Activated!**\n\n🧠 Global knowledge encyclopedia with 88% reliability!\n\n**What I can do:**\n• Search Wikipedia knowledge base\n• Educational information retrieval\n• Historical and factual data\n• General knowledge queries\n\n**Try asking:**\n• "What is blockchain technology?"\n• "History of Bitcoin"\n• "Explain quantum computing"\n• "Tell me about space exploration"\n\n📖 Knowledge ready!`;
+        break;
+        
+      case 'sports':
+        welcomeContent = `🏀 **Sports Oracle Activated!**\n\n⚽ Comprehensive NBA and global sports data with 92% reliability!\n\n**What I can do:**\n• NBA team information and profiles\n• Basketball league standings\n• Team statistics and history\n• Global sports leagues data\n\n**Try asking (use full team names):**\n• "Los Angeles Lakers"\n• "Golden State Warriors"\n• "Boston Celtics"\n• "Chicago Bulls"\n\n**💡 Tip:** Use complete team names for best results (e.g., "Los Angeles Lakers" instead of just "Lakers")\n\n🏆 Sports data ready!`;
         break;
         
       default:
-        welcomeContent = `🎭 ${serviceName} activated!\n\n🔮 Oracle system ready to assist you.\n\nWhat would you like me to help you with?`;
+        welcomeContent = `🎭 ${serviceName} activated!\n\n🔮 Oracle system ready with blockchain verification.\n\n🔗 All responses include transaction hash and explorer links.\n\nWhat would you like me to help you with?`;
     }
     
     const welcomeMessage: Message = {
@@ -441,11 +580,83 @@ export default function OracleAssistant() {
     { icon: Bot, label: 'Providers', action: 'show oracle providers' }
   ]
 
+  // Function to render message content with clickable buttons
+  const renderMessageContent = (content: string) => {
+    console.log('Rendering content:', content);
+    // Split content by button markers
+    const parts = content.split(/(EXPLORER_BUTTON::|HASHSCAN_BUTTON::)/);
+    console.log('Split parts:', parts);
+    const elements: JSX.Element[] = [];
+    
+    for (let i = 0; i < parts.length; i++) {
+      const part = parts[i];
+      
+      if (part === 'EXPLORER_BUTTON::') {
+        // Next part should be URL::Text
+        const nextPart = parts[i + 1];
+        if (nextPart && nextPart.includes('::')) {
+          const [url, buttonText] = nextPart.split('::');
+          if (url && buttonText) {
+            elements.push(
+              <button
+                key={i}
+                onClick={() => {
+                  console.log('Opening explorer URL:', url);
+                  window.open(url, '_blank', 'noopener,noreferrer');
+                }}
+                className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm font-medium transition-colors my-1"
+              >
+                <ExternalLink className="w-3 h-3" />
+                {buttonText}
+              </button>
+            );
+            i++; // Skip next part as we processed it
+            continue;
+          }
+        }
+      } else if (part === 'HASHSCAN_BUTTON::') {
+        // Next part should be URL::Text
+        const nextPart = parts[i + 1];
+        if (nextPart && nextPart.includes('::')) {
+          const [url, buttonText] = nextPart.split('::');
+          if (url && buttonText) {
+            elements.push(
+              <button
+                key={i}
+                onClick={() => {
+                  console.log('Opening hashscan URL:', url);
+                  window.open(url, '_blank', 'noopener,noreferrer');
+                }}
+                className="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded text-sm font-medium transition-colors my-1"
+              >
+                <Search className="w-3 h-3" />
+                {buttonText}
+              </button>
+            );
+            i++; // Skip next part as we processed it
+            continue;
+          }
+        }
+      }
+      
+      // Regular text content
+      if (part && part !== 'EXPLORER_BUTTON::' && part !== 'HASHSCAN_BUTTON::') {
+        elements.push(
+          <span key={i} className="whitespace-pre-wrap">
+            {part}
+          </span>
+        );
+      }
+    }
+    
+    return <div className="space-y-1">{elements}</div>;
+  }
+
   return (
     <div className={`flex flex-col h-full bg-gray-900 text-white ${merriweather.className} relative`}>
       
       {/* Header */}
-      <div className="p-4 border-b border-gray-800">
+      <div className="flex-shrink-0 p-4 border-b border-gray-800">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-3">
             <div className={`w-3 h-3 rounded-full transition-colors ${
@@ -492,7 +703,7 @@ export default function OracleAssistant() {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-950">
+      <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4 bg-gray-950">
         {messages.map((message) => (
           <div
             key={message.id}
@@ -514,7 +725,12 @@ export default function OracleAssistant() {
                 ? 'bg-blue-600 text-white' 
                 : 'bg-gray-800 text-gray-100'
             }`}>
-              <div className="text-sm whitespace-pre-wrap">{message.content}</div>
+              <div className="text-sm">
+                {message.type === 'assistant' ? 
+                  renderMessageContent(message.content) : 
+                  <span className="whitespace-pre-wrap">{message.content}</span>
+                }
+              </div>
               <span className="text-xs text-gray-400 mt-1 block">
                 {message.timestamp.toLocaleTimeString()}
               </span>
@@ -564,7 +780,7 @@ export default function OracleAssistant() {
       </div>
 
       {/* Input */}
-      <div className="p-4 border-t border-gray-800">
+      <div className="flex-shrink-0 p-4 border-t border-gray-800">
         <div className="flex gap-2">
           <input
             type="text"

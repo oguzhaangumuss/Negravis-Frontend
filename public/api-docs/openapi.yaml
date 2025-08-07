@@ -34,6 +34,14 @@ tags:
     description: Cryptocurrency price information
   - name: Weather Data
     description: Weather information from multiple sources
+  - name: Sports Data
+    description: Sports information including NBA, soccer, and other leagues
+  - name: Exchange Rate Data
+    description: Currency exchange rates and forex data
+  - name: NASA Data
+    description: NASA space data and astronomy information
+  - name: Wikipedia Data
+    description: Wikipedia articles and general knowledge
   - name: System
     description: System status and provider management
   - name: Health
@@ -399,6 +407,188 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+
+  /api/oracle/sports/{query}:
+    get:
+      tags:
+        - Sports Data
+      summary: Get Sports Information
+      description: |
+        Retrieve sports data including NBA player stats, team information, game schedules, and league data from multiple sports databases.
+        
+        **Query Examples:**
+        - Team names: "Lakers", "Golden State Warriors", "Manchester United"
+        - Player names: "LeBron James", "Stephen Curry", "Lionel Messi"
+        - General queries: "NBA schedule", "Premier League standings"
+      parameters:
+        - name: query
+          in: path
+          required: true
+          description: Sports query (team, player, league, or general sports query)
+          schema:
+            type: string
+          examples:
+            team:
+              value: "Lakers"
+              summary: NBA team query
+            player:
+              value: "LeBron James"
+              summary: NBA player query
+            schedule:
+              value: "NBA games"
+              summary: NBA games schedule
+      responses:
+        '200':
+          description: Sports data retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SportsResponse'
+        '404':
+          description: Sports data not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/oracle/dia/{symbol}:
+    get:
+      tags:
+        - Price Data
+      summary: Get DIA Oracle Price Data
+      description: |
+        Retrieve cryptocurrency price data from DIA (Decentralised Information Asset) oracle network.
+      parameters:
+        - name: symbol
+          in: path
+          required: true
+          description: Cryptocurrency symbol (e.g., BTC, ETH)
+          schema:
+            type: string
+            pattern: '^[A-Z]{2,10}$'
+      responses:
+        '200':
+          description: DIA price data retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PriceResponse'
+
+  /api/oracle/exchangerate/{from}/{to}:
+    get:
+      tags:
+        - Exchange Rate Data
+      summary: Get Currency Exchange Rates
+      description: |
+        Retrieve real-time currency exchange rates between any two currencies.
+        
+        **Supported Currencies:**
+        - Major currencies: USD, EUR, GBP, JPY, AUD, CAD, CHF
+        - Cryptocurrencies: BTC, ETH, ADA, SOL
+      parameters:
+        - name: from
+          in: path
+          required: true
+          description: Base currency code
+          schema:
+            type: string
+            pattern: '^[A-Z]{3}$'
+          examples:
+            usd:
+              value: "USD"
+              summary: US Dollar
+            eur:
+              value: "EUR"
+              summary: Euro
+        - name: to
+          in: path
+          required: true
+          description: Target currency code
+          schema:
+            type: string
+            pattern: '^[A-Z]{3}$'
+          examples:
+            eur:
+              value: "EUR"
+              summary: Euro
+            gbp:
+              value: "GBP"
+              summary: British Pound
+      responses:
+        '200':
+          description: Exchange rate retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExchangeRateResponse'
+
+  /api/oracle/nasa/{query}:
+    get:
+      tags:
+        - NASA Data
+      summary: Get NASA Space Data
+      description: |
+        Retrieve NASA space data including Astronomy Picture of the Day (APOD), Mars rover photos, and space mission information.
+        
+        **Query Types:**
+        - "apod" or "astronomy picture" - Get Astronomy Picture of the Day
+        - "mars" or "rover" - Get Mars rover images
+        - "iss" or "space station" - Get ISS information
+      parameters:
+        - name: query
+          in: path
+          required: true
+          description: NASA data query type
+          schema:
+            type: string
+          examples:
+            apod:
+              value: "apod"
+              summary: Astronomy Picture of the Day
+            mars:
+              value: "mars rover"
+              summary: Mars rover images
+      responses:
+        '200':
+          description: NASA data retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NASAResponse'
+
+  /api/oracle/wikipedia/{query}:
+    get:
+      tags:
+        - Wikipedia Data
+      summary: Get Wikipedia Information
+      description: |
+        Retrieve Wikipedia article summaries and information on any topic.
+        
+        **Examples:**
+        - "Bitcoin" - Get Bitcoin Wikipedia summary
+        - "Artificial Intelligence" - Get AI article
+        - "Istanbul" - Get city information
+      parameters:
+        - name: query
+          in: path
+          required: true
+          description: Wikipedia search query
+          schema:
+            type: string
+          examples:
+            crypto:
+              value: "Bitcoin"
+              summary: Bitcoin article
+            tech:
+              value: "Artificial Intelligence"
+              summary: AI article
+      responses:
+        '200':
+          description: Wikipedia data retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WikipediaResponse'
 
   /api/oracle/batch:
     post:
@@ -785,6 +975,139 @@ components:
                     type: string
                   execution_time_ms:
                     type: integer
+        error:
+          type: string
+
+    SportsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            type:
+              type: string
+              description: Type of sports data (team, player, league, games)
+            team_name:
+              type: string
+              description: Team name (for team queries)
+            player_name:
+              type: string
+              description: Player name (for player queries)
+            sport:
+              type: string
+              description: Sport type
+            league:
+              type: string
+              description: League name
+            description:
+              type: string
+              description: Detailed description
+            source:
+              type: string
+              description: Data source (thesportsdb, balldontlie)
+            timestamp:
+              type: integer
+              format: int64
+        error:
+          type: string
+
+    ExchangeRateResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            from_currency:
+              type: string
+              description: Base currency code
+            to_currency:
+              type: string
+              description: Target currency code
+            exchange_rate:
+              type: number
+              format: float
+              description: Exchange rate
+            amount:
+              type: number
+              format: float
+              description: Converted amount
+            source:
+              type: string
+              description: Exchange rate data source
+            timestamp:
+              type: integer
+              format: int64
+        error:
+          type: string
+
+    NASAResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            type:
+              type: string
+              description: NASA data type (apod, mars_rover, etc.)
+            title:
+              type: string
+              description: Title of the content
+            description:
+              type: string
+              description: Content description
+            url:
+              type: string
+              format: uri
+              description: Image or content URL
+            date:
+              type: string
+              format: date
+              description: Content date
+            source:
+              type: string
+              description: NASA API source
+            timestamp:
+              type: integer
+              format: int64
+        error:
+          type: string
+
+    WikipediaResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            title:
+              type: string
+              description: Wikipedia article title
+            summary:
+              type: string
+              description: Article summary
+            url:
+              type: string
+              format: uri
+              description: Wikipedia article URL
+            extract:
+              type: string
+              description: Article extract/content
+            page_id:
+              type: integer
+              description: Wikipedia page ID
+            source:
+              type: string
+              description: Wikipedia API source
+            timestamp:
+              type: integer
+              format: int64
         error:
           type: string
 
