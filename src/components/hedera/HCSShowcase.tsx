@@ -8,7 +8,7 @@ interface LogEntry {
   id: string
   timestamp: string
   type: 'oracle_query' | 'consensus_result' | 'health_check' | 'system_metrics'
-  data: any
+  data: Record<string, unknown>
   txId: string
 }
 
@@ -45,7 +45,7 @@ export default function HCSShowcase() {
           timestamp: new Date().toISOString(),
           type: 'system_metrics',
           data: { active_providers: 'Live', system_health: 'Healthy' },
-          txId: `0.0.${Math.random().toString().substr(2, 8)}@${Date.now() / 1000}`
+          txId: 'fallback-system-metrics'
         }
       ])
     }
@@ -88,7 +88,7 @@ export default function HCSShowcase() {
               status: 'simulated',
               timestamp: new Date().toISOString()
             },
-            txId: `test-${Date.now()}`
+            txId: `frontend-test-${Date.now()}`
           }
           setLogs(prev => [newLog, ...prev.slice(0, 9)])
         }
@@ -146,7 +146,7 @@ export default function HCSShowcase() {
               Immutable Oracle Audit Trail
             </h2>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              Every Oracle query, consensus result, and system event permanently recorded on Hedera's 
+              Every Oracle query, consensus result, and system event permanently recorded on Hedera&apos;s 
               Byzantine fault-tolerant consensus network with complete provenance tracking.
             </p>
           </motion.div>
@@ -207,7 +207,7 @@ export default function HCSShowcase() {
             <div className="bg-gradient-to-r from-blue-900/50 to-purple-900/50 border border-blue-500/30 rounded-xl p-6">
               <h3 className="text-xl font-bold text-white mb-2">🛡️ Byzantine Fault Tolerant</h3>
               <p className="text-gray-300">
-                Hedera's ABFT consensus ensures no data can be tampered with or lost, 
+                Hedera&apos;s ABFT consensus ensures no data can be tampered with or lost, 
                 providing enterprise-grade immutable audit trails for regulatory compliance.
               </p>
             </div>

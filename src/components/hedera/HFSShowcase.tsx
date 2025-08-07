@@ -112,7 +112,7 @@ export default function HFSShowcase() {
             </h2>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
               GDPR-compliant identity document management with AES-256 encryption, 
-              SHA-256 integrity verification, and immutable file storage on Hedera's distributed ledger.
+              SHA-256 integrity verification, and immutable file storage on Hedera&apos;s distributed ledger.
             </p>
           </motion.div>
         </div>

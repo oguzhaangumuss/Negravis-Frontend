@@ -197,12 +197,12 @@ class OracleApiService {
     userId?: string
   ): Promise<{
     success: boolean;
-    data?: any;
+    data?: Record<string, unknown>;
     query_info?: {
       symbol?: string;
       answer?: string;
-      sources?: any[];
-      consensus?: any;
+      sources?: Record<string, unknown>[];
+      consensus?: Record<string, unknown>;
     };
     blockchain?: {
       transaction_id: string;
@@ -212,7 +212,7 @@ class OracleApiService {
       explorer_link: string;
     };
     hashscan_url?: string;
-    metadata?: any;
+    metadata?: Record<string, unknown>;
     error?: string;
   }> {
     try {
@@ -239,27 +239,24 @@ class OracleApiService {
       console.log('📊 Oracle response:', data);
 
       if (data.success) {
-        // Generate appropriate queryId based on provider and query
-        const queryType = provider === 'weather' ? 'weather' : 
-                         provider === 'nasa' ? 'nasa' : 
-                         provider === 'wikipedia' ? 'wiki' : 
-                         'crypto-price';
-        const queryId = `${queryType}-${Date.now()}`;
-        const transactionId = `0.0.${Math.random().toString().substr(2, 8)}@${Date.now()}`;
+        // Use real transaction ID from backend - no fake query ID generation
+        const transactionId = data.blockchain?.transaction_id || data.data?.blockchain_hash || 'N/A';
         
-        // Get current frontend URL (for localhost:3000 or production)
-        const frontendUrl = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
+        console.log('🔍 Backend transaction_id:', data.blockchain?.transaction_id);
+        console.log('🔍 Backend blockchain_hash:', data.data?.blockchain_hash);
+        console.log('🔍 Final transactionId used:', transactionId);
         
         const result = {
           ...data,
           blockchain: {
             transaction_id: transactionId,
-            hash: `0x${Math.random().toString(16).substr(2, 16)}...`,
+            hash: transactionId, // Use actual transaction ID as hash
             network: 'hedera-testnet',
             verified: true,
-            explorer_link: `${frontendUrl}/hashscan?type=transaction&id=${encodeURIComponent(transactionId)}`
+            explorer_link: `https://hashscan.io/testnet/transaction/${encodeURIComponent(transactionId)}`
           },
-          hashscan_url: `${frontendUrl}/hashscan?type=query&id=${encodeURIComponent(queryId)}`
+          // Redirect to local hashscan page first to show all data
+          hashscan_url: `http://localhost:3000/hashscan?id=${encodeURIComponent(transactionId)}`
         };
         
         // Use backend query_info if available, otherwise create enhanced query_info for better UI formatting
@@ -461,6 +458,7 @@ class OracleApiService {
       
       if (data.success && data.query) {
         // Get current frontend URL (for localhost:3000 or production)
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const frontendUrl = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
         
         // Transform backend response to match frontend interface
@@ -468,7 +466,7 @@ class OracleApiService {
           ...data.query,
           data_sources: data.query.sources || [], // Map sources to data_sources for compatibility
           blockchain_hash: data.query.blockchain?.transaction_id || 'N/A',
-          blockchain_link: `${frontendUrl}/hashscan?type=transaction&id=${encodeURIComponent(data.query.blockchain?.transaction_id || '')}`
+          blockchain_link: `https://hashscan.io/testnet/transaction/${encodeURIComponent(data.query.blockchain?.transaction_id || '')}`
         };
         
         return {

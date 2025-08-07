@@ -12,7 +12,7 @@ interface Transaction {
   timestamp: string
   fee: string
   explorer_url: string
-  details?: any
+  details?: Record<string, unknown>
 }
 
 export default function HashScanShowcase() {

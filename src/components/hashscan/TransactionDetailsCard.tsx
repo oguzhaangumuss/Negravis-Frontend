@@ -42,15 +42,20 @@ export default function TransactionDetailsCard({ transactionResult }: Transactio
           <h3 className="font-semibold mb-2 text-gray-300">Network</h3>
           <p className="text-blue-400 mb-4">{transactionResult.network}</p>
           
-          <a
-            href={transactionResult.explorer_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg font-semibold flex items-center gap-2 transition-colors inline-flex"
-          >
-            <ExternalLink className="w-4 h-4" />
-            View on Explorer
-          </a>
+          <div className="space-y-3">
+            <a
+              href={transactionResult.explorer_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-green-600 hover:bg-green-700 px-6 py-3 rounded-lg font-semibold flex items-center gap-2 transition-colors inline-flex"
+            >
+              <ExternalLink className="w-4 h-4" />
+              View on HashScan Explorer
+            </a>
+            <p className="text-gray-400 text-xs">
+              🔗 Opens transaction details on Hedera&apos;s official block explorer
+            </p>
+          </div>
         </div>
       </div>
       

@@ -23,20 +23,25 @@ export default function BlockchainVerificationCard({
             {blockchainHash}
           </p>
         </div>
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col space-y-3">
           <div>
-            <h4 className="font-semibold mb-2 text-gray-300">Hedera Explorer</h4>
-            <p className="text-sm text-gray-400 mb-3">View on blockchain</p>
+            <h4 className="font-semibold mb-2 text-gray-300">Blockchain Verification</h4>
+            <p className="text-sm text-gray-400 mb-3">
+              🔐 Immutably stored on Hedera Consensus Service (HCS)
+            </p>
           </div>
           <a
             href={blockchainLink}
             target="_blank"
             rel="noopener noreferrer"
-            className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg font-semibold flex items-center gap-2 transition-colors"
+            className="bg-green-600 hover:bg-green-700 px-6 py-3 rounded-lg font-semibold flex items-center gap-2 transition-colors w-fit"
           >
             <ExternalLink className="w-4 h-4" />
-            View
+            View on HashScan Explorer
           </a>
+          <p className="text-gray-400 text-xs">
+            🔗 Verify transaction authenticity on Hedera&apos;s official explorer
+          </p>
         </div>
       </div>
     </div>

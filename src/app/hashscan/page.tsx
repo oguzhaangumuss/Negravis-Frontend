@@ -5,15 +5,17 @@ import { useSearchParams } from 'next/navigation'
 import { Merriweather } from 'next/font/google'
 import { 
   Hash,
-  AlertCircle
+  AlertCircle,
+  Search,
+  ExternalLink,
+  Clock,
+  Database,
+  Activity,
+  BarChart3
 } from 'lucide-react'
 
 import { HashscanQueryResult, HashscanTransactionResult, oracleApi } from '../../services/oracleApi'
-import SearchBar from '../../components/hashscan/SearchBar'
-import QueryResultCard from '../../components/hashscan/QueryResultCard'
-import DataSourcesCard from '../../components/hashscan/DataSourcesCard'
-import BlockchainVerificationCard from '../../components/hashscan/BlockchainVerificationCard'
-import TransactionDetailsCard from '../../components/hashscan/TransactionDetailsCard'
+import { CopyButton } from '../../components/CopyButton'
 
 const merriweather = Merriweather({ 
   subsets: ['latin'],
@@ -21,9 +23,7 @@ const merriweather = Merriweather({
   variable: '--font-merriweather'
 })
 
-interface HashscanPageContentProps {}
-
-function HashscanPageContent({}: HashscanPageContentProps) {
+function HashscanPageContent() {
   const searchParams = useSearchParams()
   const [queryResult, setQueryResult] = useState<HashscanQueryResult | null>(null)
   const [transactionResult, setTransactionResult] = useState<HashscanTransactionResult | null>(null)
@@ -36,10 +36,18 @@ function HashscanPageContent({}: HashscanPageContentProps) {
     const type = searchParams.get('type')
     const id = searchParams.get('id')
     
-    if (type === 'query' && id) {
-      handleQueryLookup(id)
-    } else if (type === 'transaction' && id) {
-      handleTransactionLookup(id)
+    if (id) {
+      setSearchQuery(id)
+      // Auto-detect based on pattern if no type specified
+      const isHederaTransactionId = /^0\.0\.\d+@\d+\.\d+$/.test(id)
+      
+      if (type === 'query' || (!type && !isHederaTransactionId)) {
+        console.log('🔍 URL: Query lookup for:', id)
+        handleQueryLookup(id)
+      } else if (type === 'transaction' || (!type && isHederaTransactionId)) {
+        console.log('🔍 URL: Transaction lookup for:', id)
+        handleTransactionLookup(id)
+      }
     }
   }, [searchParams])
 
@@ -86,31 +94,50 @@ function HashscanPageContent({}: HashscanPageContentProps) {
   const handleSearch = () => {
     if (!searchQuery.trim()) return
     
-    // Determine if it's a query ID or transaction ID based on pattern
-    if (searchQuery.includes('-') || searchQuery.length < 20) {
-      handleQueryLookup(searchQuery.trim())
+    const trimmedQuery = searchQuery.trim()
+    
+    // Determine if it's a Hedera transaction ID or query ID based on pattern
+    const isHederaTransactionId = /^0\.0\.\d+@\d+\.\d+$/.test(trimmedQuery)
+    
+    if (isHederaTransactionId) {
+      console.log('🔍 Detected Hedera transaction ID:', trimmedQuery)
+      handleTransactionLookup(trimmedQuery)
     } else {
-      handleTransactionLookup(searchQuery.trim())
+      console.log('🔍 Detected query ID:', trimmedQuery)
+      handleQueryLookup(trimmedQuery)
     }
   }
 
+  const formatTimestamp = (timestamp: string | number) => {
+    const date = new Date(typeof timestamp === 'number' ? timestamp : timestamp)
+    return date.toLocaleString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    })
+  }
 
   return (
-    <div className={`min-h-screen bg-black text-white ${merriweather.className}`}>
+    <div className={`min-h-screen bg-slate-900 text-white ${merriweather.className}`}>
       {/* Header */}
-      <header className="border-b border-gray-800">
+      <header className="border-b border-slate-700/50">
         <nav className="flex justify-between items-center max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-white rounded"></div>
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-white rounded-lg"></div>
             <span className="text-xl font-bold">Negravis</span>
-            <span className="text-gray-400">/</span>
+            <span className="text-slate-400">/</span>
             <span className="text-lg">Hashscan</span>
           </div>
           <div className="flex items-center gap-6">
-            <button className="text-gray-300 hover:text-white">Dashboard</button>
-            <button className="text-gray-300 hover:text-white">Oracle API</button>
-            <button className="text-gray-300 hover:text-white">Analytics</button>
-            <button className="bg-white text-black px-4 py-2 rounded-md font-semibold">Connect Wallet</button>
+            <button className="text-slate-300 hover:text-white transition-colors">Dashboard</button>
+            <button className="text-slate-300 hover:text-white transition-colors">Oracle API</button>
+            <button className="text-slate-300 hover:text-white transition-colors">Analytics</button>
+            <button className="bg-white text-slate-900 px-4 py-2 rounded-lg font-semibold transition-all">
+              Connect Wallet
+            </button>
           </div>
         </nav>
       </header>
@@ -119,80 +146,321 @@ function HashscanPageContent({}: HashscanPageContentProps) {
       <main className="max-w-7xl mx-auto px-6 py-8">
         {/* Header Section */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2 flex items-center gap-3">
+          <div className="flex items-center gap-3 mb-4">
             <Hash className="w-8 h-8 text-blue-400" />
-            Oracle Hashscan
-          </h1>
-          <p className="text-gray-400">
+          </div>
+          <h1 className="text-4xl font-bold mb-4">Oracle Hashscan</h1>
+          <p className="text-xl text-slate-400">
             Explore Oracle query results with blockchain verification and data source transparency
           </p>
         </div>
 
         {/* Search Section */}
-        <SearchBar
-          searchQuery={searchQuery}
-          onSearchQueryChange={setSearchQuery}
-          onSearch={handleSearch}
-          loading={loading}
-        />
+        <div className="bg-slate-800 rounded-2xl p-6 mb-8 border border-slate-700/50">
+          <div className="flex gap-4 mb-4">
+            <div className="relative flex-1">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                placeholder="Enter Query ID or Transaction Hash..."
+                className="w-full px-4 py-3 bg-slate-700 border border-slate-600/50 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50"
+              />
+            </div>
+            <button
+              onClick={handleSearch}
+              disabled={loading || !searchQuery.trim()}
+              className="px-8 py-3 bg-slate-600 hover:bg-slate-500 disabled:opacity-50 text-white rounded-lg transition-all flex items-center gap-2"
+            >
+              <Search className="w-4 h-4" />
+              Search
+            </button>
+          </div>
+          <p className="text-sm text-slate-400">
+            Enter a Query ID (e.g., bitcoin-price-123) or Transaction Hash to explore Oracle data
+          </p>
+        </div>
 
         {/* Loading State */}
         {loading && (
-          <div className="bg-gray-900 border border-gray-800 rounded-lg p-8 text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-400 mx-auto mb-4"></div>
-            <p className="text-gray-400">Searching blockchain records...</p>
+          <div className="bg-slate-800 rounded-2xl p-8 text-center border border-slate-700/50">
+            <div className="animate-spin rounded-full h-8 w-8 border-4 border-blue-500 border-t-transparent mx-auto mb-4"></div>
+            <p className="text-slate-400">Searching blockchain records...</p>
           </div>
         )}
 
         {/* Error State */}
         {error && (
-          <div className="bg-red-900/20 border border-red-700 rounded-lg p-6 mb-8">
+          <div className="bg-red-900/20 border border-red-500/30 rounded-2xl p-6 mb-8">
             <div className="flex items-center gap-3 mb-2">
               <AlertCircle className="w-5 h-5 text-red-400" />
-              <h3 className="font-semibold text-red-400">Error</h3>
+              <h3 className="font-semibold text-red-400">Search Error</h3>
             </div>
-            <p className="text-gray-300">{error}</p>
+            <p className="text-red-300/80">{error}</p>
           </div>
         )}
 
-        {/* Query Result Display */}
+        {/* Query Result Display - Compact Design */}
         {queryResult && (
           <div className="space-y-6">
-            <QueryResultCard queryResult={queryResult} />
-            <DataSourcesCard dataSources={queryResult.data_sources} />
-            <BlockchainVerificationCard 
-              blockchainHash={queryResult.blockchain_hash}
-              blockchainLink={queryResult.blockchain_link}
-            />
-
-            {/* Raw Data (if available) */}
-            {queryResult.raw_data && (
-              <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
-                <h3 className="text-xl font-bold mb-4">Raw Data</h3>
-                <pre className="bg-gray-800 p-4 rounded-lg overflow-x-auto text-sm">
-                  {JSON.stringify(queryResult.raw_data, null, 2)}
-                </pre>
+            {/* Query Result Card */}
+            <div className="bg-slate-800 border border-slate-700/50 rounded-2xl p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <Database className="w-6 h-6 text-blue-400" />
+                  <h2 className="text-xl font-bold">Query Result</h2>
+                </div>
+                <span className="px-3 py-1 bg-red-500/20 text-red-400 text-sm rounded-full">
+                  NaN% Confidence
+                </span>
               </div>
-            )}
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-6">
+                <div>
+                  <h3 className="text-sm font-medium text-slate-400 mb-2">Query</h3>
+                  <p className="text-lg font-medium">{queryResult.query}</p>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-slate-400 mb-2">Answer</h3>
+                  <p className="text-2xl font-bold text-green-400">{queryResult.answer}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-6 text-sm">
+                <div className="flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-slate-400" />
+                  <span className="text-slate-400">{formatTimestamp(queryResult.timestamp)}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Activity className="w-4 h-4 text-slate-400" />
+                  <span className="text-slate-400">Query ID:</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Hash className="w-4 h-4 text-slate-400" />
+                  <span className="text-slate-400">Oracle:</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Data Sources */}
+            <div className="bg-slate-800 border border-slate-700/50 rounded-2xl p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <BarChart3 className="w-6 h-6 text-purple-400" />
+                <h3 className="text-xl font-bold">Data Sources</h3>
+              </div>
+              {queryResult.data_sources && queryResult.data_sources.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {queryResult.data_sources.map((source, index) => (
+                    <div key={index} className="bg-slate-700/30 rounded-lg p-4 border border-slate-600/30">
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="font-semibold">{source.name}</h4>
+                        <span className="px-2 py-1 bg-blue-500/20 text-blue-400 text-xs rounded">
+                          {source.type}
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <span className="text-slate-400">Weight:</span>
+                          <span className="ml-2 font-medium">{source.weight}</span>
+                        </div>
+                        <div>
+                          <span className="text-slate-400">Confidence:</span>
+                          <span className="ml-2 font-medium">{source.confidence}%</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-slate-400">No data sources available</p>
+              )}
+            </div>
+
+            {/* Blockchain Verification */}
+            <div className="bg-slate-800 border border-slate-700/50 rounded-2xl p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                <h3 className="text-xl font-bold">Blockchain Verification</h3>
+              </div>
+              
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div>
+                  <h4 className="font-medium text-slate-400 mb-2">Transaction Hash</h4>
+                  <div className="bg-slate-700/50 p-4 rounded-lg border border-slate-600/30 mb-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <code className="text-sm font-mono break-all">
+                        {queryResult.blockchain_hash}
+                      </code>
+                      <CopyButton text={queryResult.blockchain_hash} />
+                    </div>
+                  </div>
+                </div>
+                
+                <div>
+                  <h4 className="font-medium text-slate-400 mb-2">Hedera Explorer</h4>
+                  <p className="text-slate-400 text-sm mb-4">View on blockchain</p>
+                  <a
+                    href={queryResult.blockchain_link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg font-semibold transition-all"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    View
+                  </a>
+                </div>
+              </div>
+            </div>
           </div>
         )}
 
-        {/* Transaction Result Display */}
+        {/* Transaction Result Display - Compact Design */}
         {transactionResult && (
-          <TransactionDetailsCard transactionResult={transactionResult} />
+          <div className="space-y-6">
+            {/* Parse HCS Data for Oracle Results */}
+            {(() => {
+              try {
+                const details = transactionResult.details as Record<string, unknown>;
+                
+                // Try to parse HCS data if present
+                const hcsData = details?.hcs_data as Record<string, unknown>;
+                if (hcsData?.result) {
+                  const oracleResult = hcsData.result as Record<string, unknown>;
+                  const rawResponses = (oracleResult.raw_responses as Record<string, unknown>[]) || [];
+                  
+                  return (
+                    <>
+                      {/* Query Result Card */}
+                      <div className="bg-slate-800 border border-slate-700/50 rounded-2xl p-6">
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="flex items-center gap-3">
+                            <Database className="w-6 h-6 text-blue-400" />
+                            <h2 className="text-xl font-bold">Query Result</h2>
+                          </div>
+                          <span className="px-3 py-1 bg-green-500/20 text-green-400 text-sm rounded-full">
+                            {Math.round(((oracleResult.confidence as number || 0.95) * 100))}% Confidence
+                          </span>
+                        </div>
+
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-6">
+                          <div>
+                            <h3 className="text-sm font-medium text-slate-400 mb-2">Query</h3>
+                            <p className="text-lg font-medium">{(hcsData.query as string) || 'Unknown'}</p>
+                          </div>
+                          <div>
+                            <h3 className="text-sm font-medium text-slate-400 mb-2">Answer</h3>
+                            <p className="text-2xl font-bold text-green-400">${(oracleResult.value as string) || '0'}</p>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-3 gap-6 text-sm">
+                          <div className="flex items-center gap-2">
+                            <Clock className="w-4 h-4 text-slate-400" />
+                            <span className="text-slate-400">{formatTimestamp(transactionResult.timestamp)}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Activity className="w-4 h-4 text-slate-400" />
+                            <span className="text-slate-400">Query ID: {transactionResult.id.split('@')[0]}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Hash className="w-4 h-4 text-slate-400" />
+                            <span className="text-slate-400">Oracle: {((rawResponses[0] as Record<string, unknown>)?.source as string) || 'Multiple'}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Data Sources */}
+                      <div className="bg-slate-800 border border-slate-700/50 rounded-2xl p-6">
+                        <div className="flex items-center gap-3 mb-4">
+                          <BarChart3 className="w-6 h-6 text-purple-400" />
+                          <h3 className="text-xl font-bold">Data Sources</h3>
+                        </div>
+                        {rawResponses.length > 0 ? (
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {rawResponses.map((response: Record<string, unknown>, index: number) => (
+                              <div key={index} className="bg-slate-700/30 rounded-lg p-4 border border-slate-600/30">
+                                <div className="flex items-center justify-between mb-2">
+                                  <h4 className="font-semibold capitalize">{(response.source as string) || 'Unknown'}</h4>
+                                  <span className="px-2 py-1 bg-blue-500/20 text-blue-400 text-xs rounded">
+                                    API
+                                  </span>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4 text-sm">
+                                  <div>
+                                    <span className="text-slate-400">Price:</span>
+                                    <span className="ml-2 font-medium">${((response.data as Record<string, unknown>)?.price as number) || 0}</span>
+                                  </div>
+                                  <div>
+                                    <span className="text-slate-400">Confidence:</span>
+                                    <span className="ml-2 font-medium">{Math.round(((response.confidence as number) || 0.95) * 100)}%</span>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-slate-400">No data sources available</p>
+                        )}
+                      </div>
+                    </>
+                  );
+                }
+                
+                // Fallback for other transaction types
+                return null;
+                
+              } catch {
+                return null;
+              }
+            })()}
+
+            {/* Blockchain Verification */}
+            <div className="bg-slate-800 border border-slate-700/50 rounded-2xl p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                <h3 className="text-xl font-bold">Blockchain Verification</h3>
+              </div>
+              
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div>
+                  <h4 className="font-medium text-slate-400 mb-2">Transaction Hash</h4>
+                  <div className="bg-slate-700/50 p-4 rounded-lg border border-slate-600/30 mb-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <code className="text-sm font-mono break-all">
+                        {transactionResult.id}
+                      </code>
+                      <CopyButton text={transactionResult.id} />
+                    </div>
+                  </div>
+                </div>
+                
+                <div>
+                  <h4 className="font-medium text-slate-400 mb-2">Hedera Explorer</h4>
+                  <p className="text-slate-400 text-sm mb-4">View on blockchain</p>
+                  <a
+                    href={transactionResult.explorer_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg font-semibold transition-all"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    View
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
         )}
 
         {/* No Results State */}
         {!loading && !error && !queryResult && !transactionResult && (
-          <div className="bg-gray-900 border border-gray-800 rounded-lg p-8 text-center">
-            <Hash className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-            <h3 className="text-xl font-bold mb-2 text-gray-300">Start Exploring</h3>
-            <p className="text-gray-400 mb-4">
-              Enter a Query ID or Transaction Hash to view detailed Oracle data and blockchain verification
+          <div className="bg-slate-800 border border-slate-700/50 rounded-2xl p-12 text-center">
+            <Hash className="w-16 h-16 text-slate-600 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold mb-2 text-slate-400">Ready to Explore</h3>
+            <p className="text-slate-500 mb-6">
+              Enter a Transaction ID or Query ID above to view Oracle data with blockchain verification
             </p>
-            <div className="text-sm text-gray-500">
-              Example: bitcoin-price-1734567890 or 0.0.123456@1234567890.123456789
-            </div>
           </div>
         )}
       </main>
@@ -203,8 +471,11 @@ function HashscanPageContent({}: HashscanPageContentProps) {
 export default function HashscanPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-400"></div>
+      <div className="min-h-screen bg-slate-900 text-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-4 border-blue-500 border-t-transparent mx-auto mb-4"></div>
+          <p className="text-slate-400">Loading HashScan Explorer...</p>
+        </div>
       </div>
     }>
       <HashscanPageContent />

@@ -198,6 +198,7 @@ export default function OracleAssistant() {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const formatQueryResponse = (data: Record<string, unknown>, perspective?: string): string => {
     // Handle conversational AI responses
     const metadata = data.metadata as Record<string, unknown> | undefined
@@ -329,69 +330,14 @@ export default function OracleAssistant() {
           const symbol = queryInfo.symbol || 'Asset';
           const answer = queryInfo.answer || 'N/A';
           
-          // Format different query types differently
-          if (queryInfo.query_type === 'weather') {
-            formattedResponse = `🌤️ **${symbol} Weather Analysis**\n\n`;
-            formattedResponse += `🔍 **Query Results**\n\n`;
-            formattedResponse += `• Location: ${queryInfo.location || 'Unknown'}\n`;
-            formattedResponse += `• Temperature: ${queryInfo.temperature || 'N/A'}\n`;
-            if (queryInfo.humidity) formattedResponse += `• Humidity: ${queryInfo.humidity}\n`;
-            if (queryInfo.weather_description) formattedResponse += `• Weather Description: ${queryInfo.weather_description}\n`;
-            if (queryInfo.wind_speed) formattedResponse += `• Wind Speed: ${queryInfo.wind_speed}\n\n`;
-          } else if (queryInfo.query_type === 'crypto_price') {
-            formattedResponse = `💰 **${symbol} Price Analysis**\n\n`;
-            formattedResponse += `**Current Price:** ${answer}\n\n`;
-          } else if (queryInfo.query_type === 'exchange_rate') {
-            formattedResponse = `💱 **${symbol} Exchange Rate**\n\n`;
-            formattedResponse += `**Rate:** ${answer}\n\n`;
-            formattedResponse += `🔍 **Exchange Details**\n\n`;
-            formattedResponse += `• Base Currency: ${queryInfo.base_currency || 'N/A'}\n`;
-            formattedResponse += `• Target Currency: ${queryInfo.target_currency || 'N/A'}\n`;
-            formattedResponse += `• Rate: ${queryInfo.rate || 'N/A'}\n\n`;
-          } else if (queryInfo.query_type === 'nasa') {
-            formattedResponse = `🚀 **${symbol} Space Data**\n\n`;
-            formattedResponse += `**Summary:** ${answer}\n\n`;
-            formattedResponse += `🌌 **Space Details**\n\n`;
-            if (queryInfo.title) formattedResponse += `• Title: ${queryInfo.title}\n`;
-            if (queryInfo.date) formattedResponse += `• Date: ${queryInfo.date}\n`;
-            if (queryInfo.data_type) formattedResponse += `• Type: ${queryInfo.data_type}\n`;
-            if (queryInfo.explanation && queryInfo.explanation.length > 150) {
-              formattedResponse += `• Full Description: ${queryInfo.explanation}\n`;
-            }
-            formattedResponse += `\n`;
-          } else if (queryInfo.query_type === 'wikipedia') {
-            formattedResponse = `📚 **${symbol} Knowledge**\n\n`;
-            formattedResponse += `**Summary:** ${answer}\n\n`;
-            formattedResponse += `📖 **Wikipedia Details**\n\n`;
-            if (queryInfo.title) formattedResponse += `• Article: ${queryInfo.title}\n`;
-            if (queryInfo.results_count) formattedResponse += `• Results Found: ${queryInfo.results_count}\n`;
-            if (queryInfo.extract && queryInfo.extract.length > 200) {
-              formattedResponse += `• Full Extract: ${queryInfo.extract}\n`;
-            }
-            formattedResponse += `\n`;
-          } else if (queryInfo.query_type === 'sports') {
-            formattedResponse = `🏀 **${symbol} Sports Data**\n\n`;
-            formattedResponse += `**Info:** ${answer}\n\n`;
-            formattedResponse += `🏆 **Team Details**\n\n`;
-            if (queryInfo.sport) formattedResponse += `• Sport: ${queryInfo.sport}\n`;
-            if (queryInfo.league) formattedResponse += `• League: ${queryInfo.league}\n`;
-            if (queryInfo.country) formattedResponse += `• Country: ${queryInfo.country}\n`;
-            if (queryInfo.founded) formattedResponse += `• Founded: ${queryInfo.founded}\n`;
-            if (queryInfo.stadium) formattedResponse += `• Stadium: ${queryInfo.stadium}\n`;
-            if (queryInfo.website) formattedResponse += `• Website: ${queryInfo.website}\n`;
-            if (queryInfo.description && queryInfo.description.length > answer.length) {
-              formattedResponse += `• Description: ${queryInfo.description}\n`;
-            }
-            formattedResponse += `\n`;
-          } else {
-            formattedResponse = `🔍 **${symbol} Query Analysis**\n\n`;
-            formattedResponse += `**Result:** ${answer}\n\n`;
-          }
+          // Format query response
+          formattedResponse = `🔍 **${symbol} Query Analysis**\n\n`;
+          formattedResponse += `**Result:** ${answer}\n\n`;
           
           // Data sources
           if (queryInfo.sources && Array.isArray(queryInfo.sources)) {
             formattedResponse += `📊 **Data Sources:**\n`;
-            queryInfo.sources.forEach((source: any) => {
+            queryInfo.sources.forEach((source: Record<string, unknown>) => {
               const icon = source.type === 'blockchain' ? '🔗' : '📡';
               formattedResponse += `${icon} **${source.name}**: ${source.confidence}% confidence\n`;
             });
@@ -402,7 +348,7 @@ export default function OracleAssistant() {
           if (queryInfo.consensus) {
             formattedResponse += `📊 **Data Quality:**\n`;
             formattedResponse += `• Confidence: ${queryInfo.consensus.confidence_score}%\n`;
-            formattedResponse += `• Sources: ${queryInfo.sources?.map((s: any) => s.name?.toLowerCase() || 'unknown').join(', ') || 'N/A'}\n`;
+            formattedResponse += `• Sources: ${queryInfo.sources?.map((s: Record<string, unknown>) => String(s.name)?.toLowerCase() || 'unknown').join(', ') || 'N/A'}\n`;
             formattedResponse += `• Method: ${queryInfo.consensus.method}\n`;
             formattedResponse += `• Providers: ${queryInfo.consensus.provider_count}\n`;
           }
@@ -425,15 +371,17 @@ export default function OracleAssistant() {
         // Legacy price format fallback
         else if (data.price !== undefined) {
           // New price feed format
-          const symbol = data.pair ? data.pair.split('/')[0] : 'BTC';
-          const price = data.decimals ? data.price / Math.pow(10, data.decimals) : data.price;
+          const symbol = (data.pair && typeof data.pair === 'string') ? data.pair.split('/')[0] : 'BTC';
+          const price = (data.decimals && typeof data.price === 'number' && typeof data.decimals === 'number') 
+            ? data.price / Math.pow(10, data.decimals) 
+            : (typeof data.price === 'number' ? data.price : 0);
           
           formattedResponse = `💰 **${symbol} Price Update**\n\n`;
           formattedResponse += `Current Price: **$${price.toLocaleString()}**\n`;
           
           if (response.metadata) {
             const meta = response.metadata;
-            if (meta.confidence) {
+            if (meta.confidence && typeof meta.confidence === 'number') {
               formattedResponse += `Confidence: ${(meta.confidence * 100).toFixed(1)}%\n`;
             }
             if (meta.sources && Array.isArray(meta.sources)) {
@@ -458,13 +406,13 @@ export default function OracleAssistant() {
             }
           }
         } else if (data.result && typeof data.result === 'object') {
-          const result = data.result;
+          const result = data.result as Record<string, unknown>;
           
           if (result.symbol && result.price) {
             // Legacy crypto price response
             formattedResponse = `💰 **${result.symbol} Price Update**\n\n`;
             formattedResponse += `Current Price: **$${result.price.toLocaleString()}**\n`;
-            if (result.confidence_score) {
+            if (result.confidence_score && typeof result.confidence_score === 'number') {
               formattedResponse += `Confidence: ${(result.confidence_score * 100).toFixed(1)}%\n`;
             }
             if (result.data_sources && Array.isArray(result.data_sources)) {
@@ -490,8 +438,8 @@ export default function OracleAssistant() {
           formattedResponse += `\n\n📊 **Data Quality:**`;
           
           const meta = response.metadata || {};
-          formattedResponse += `\n• Confidence: ${meta.confidence ? (meta.confidence * 100).toFixed(1) : 'N/A'}%`;
-          formattedResponse += `\n• Sources: ${meta.sources ? meta.sources.join(', ') : 'N/A'}`;
+          formattedResponse += `\n• Confidence: ${meta.confidence && typeof meta.confidence === 'number' ? (meta.confidence * 100).toFixed(1) : 'N/A'}%`;
+          formattedResponse += `\n• Sources: ${meta.sources && Array.isArray(meta.sources) ? meta.sources.join(', ') : 'N/A'}`;
           formattedResponse += `\n• Method: ${meta.method || 'N/A'}`;
           formattedResponse += `\n• Providers: ${meta.providersUsed || 0}`;
         }
@@ -586,7 +534,7 @@ export default function OracleAssistant() {
     // Split content by button markers
     const parts = content.split(/(EXPLORER_BUTTON::|HASHSCAN_BUTTON::)/);
     console.log('Split parts:', parts);
-    const elements: JSX.Element[] = [];
+    const elements: React.ReactElement[] = [];
     
     for (let i = 0; i < parts.length; i++) {
       const part = parts[i];

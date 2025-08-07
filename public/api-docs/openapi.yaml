@@ -2,601 +2,259 @@ openapi: 3.0.3
 info:
   title: Negravis Oracle API
   description: |
-    Advanced Oracle platform providing real-time cryptocurrency prices, weather data, and custom API integrations with Hedera blockchain support and AI-powered consensus mechanisms.
+    **Negravis Oracle Network** - Advanced Oracle platform providing real-time cryptocurrency prices, weather data, NASA space information, and custom API integrations with Hedera blockchain support and AI-powered consensus mechanisms.
     
-    ## Features
-    - **Multi-Source Data Aggregation**: Combines data from Chainlink, CoinGecko, Weather APIs, and custom sources
-    - **AI-Powered Consensus**: Smart consensus algorithms for data accuracy
-    - **Real-time Updates**: Live data feeds with low latency
-    - **Blockchain Integration**: Hedera Hashgraph integration for decentralized oracle services
-    - **Web Scraping**: Advanced web scraping with Brave Search API integration
+    ## 🚀 Features
+    - **Multi-Source Data Aggregation**: Combines data from Chainlink, CoinGecko, DIA, Weather APIs, NASA, and custom sources
+    - **AI-Powered Consensus**: Smart consensus algorithms for data accuracy and confidence scoring
+    - **Real-time Blockchain Integration**: Hedera Hashgraph HCS logging for immutable oracle data
+    - **HashScan Explorer**: Transaction visualization and blockchain verification
+    - **Web3 Analytics**: Comprehensive system monitoring and provider health tracking
+    - **Real-time Data Processing**: Advanced API integration with intelligent data processing
     
-    ## Authentication
-    Currently, no authentication is required for public endpoints.
-  version: 1.0.0
+    ## 🔗 Blockchain Integration
+    - **Network**: Hedera Testnet
+    - **HCS Topics**: Real-time consensus logging
+    - **Transaction IDs**: Format - `accountId@timestamp.nanoseconds`
+    - **Explorer**: https://hashscan.io/testnet
+    
+    ## 🌐 Live Server
+    Backend server running on: `http://localhost:4001`
+    
+  version: 2.0.0
   contact:
-    name: Oğuzhan Gümüş
+    name: Oğuzhan Gümüş - Negravis Developer
     url: https://github.com/oguzhaangumuss
-  license:
-    name: MIT
-    url: https://opensource.org/licenses/MIT
     
 servers:
-  - url: https://negravis-app.vercel.app
-    description: Production server
   - url: http://localhost:4001
-    description: Development server
+    description: Local Development Server (Active)
+  - url: https://negravis-api.vercel.app
+    description: Production Server (Coming Soon)
 
 tags:
-  - name: Oracle Query
-    description: General oracle data queries
-  - name: Price Data
-    description: Cryptocurrency price information
-  - name: Weather Data
-    description: Weather information from multiple sources
-  - name: Sports Data
-    description: Sports information including NBA, soccer, and other leagues
-  - name: Exchange Rate Data
-    description: Currency exchange rates and forex data
-  - name: NASA Data
-    description: NASA space data and astronomy information
-  - name: Wikipedia Data
-    description: Wikipedia articles and general knowledge
-  - name: System
-    description: System status and provider management
-  - name: Health
-    description: Health monitoring and diagnostics
+  - name: Oracle Manager
+    description: Enhanced Oracle Management System (Primary API)
+  - name: HashScan Explorer
+    description: Blockchain transaction explorer and verification
+  - name: Account Management
+    description: User account and authentication
+  - name: AI Services
+    description: AI-powered oracle services and chatbots
+  - name: Analytics
+    description: Network analytics and system monitoring
+  - name: HFS Storage
+    description: Hedera File Service for document storage
+  - name: Smart Contracts
+    description: Smart contract deployment and management
+  - name: HCS Consensus
+    description: Hedera Consensus Service messaging
+  - name: System Health
+    description: System status and provider health monitoring
 
 paths:
-  /api/oracle/query:
+  # ============= ORACLE MANAGER API (Primary System) =============
+  /api/oracle-manager/providers:
     get:
       tags:
-        - Oracle Query
-      summary: General Oracle Query
+        - Oracle Manager
+      summary: Get All Oracle Providers
       description: |
-        Perform a general oracle query that can fetch data from multiple sources and apply consensus algorithms.
+        Retrieve comprehensive list of all available oracle providers with categories, health status, and performance metrics.
         
-        **Examples:**
-        - `bitcoin price`
-        - `weather in Istanbul`
-        - `ethereum news`
-        - `stock price TSLA`
-      parameters:
-        - name: q
-          in: query
-          required: true
-          description: Query string to search for
-          schema:
-            type: string
-          examples:
-            crypto_price:
-              value: "bitcoin price"
-              summary: Get Bitcoin price
-            weather:
-              value: "weather in New York"
-              summary: Get weather data
-            news:
-              value: "latest ethereum news"
-              summary: Get news data
-        - name: sources
-          in: query
-          required: false
-          description: Comma-separated list of sources to use
-          schema:
-            type: string
-            example: "chainlink,coingecko"
-        - name: method
-          in: query
-          required: false
-          description: Consensus method to use
-          schema:
-            type: string
-            enum: [median, average, weighted, first]
-            default: median
-        - name: timeout
-          in: query
-          required: false
-          description: Query timeout in milliseconds
-          schema:
-            type: integer
-            default: 30000
-            minimum: 1000
-            maximum: 60000
+        **Provider Categories:**
+        - **Premium**: Chainlink (Decentralized oracle network)
+        - **Free**: CoinGecko, DIA, Wikipedia, Weather, Exchange Rate, Sports
+        - **Official**: NASA (Space and astronomy data)
+        - **Dynamic**: Exchange Rate (Real-time currency data)
       responses:
         '200':
-          description: Successful query response
+          description: Providers retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      categories:
+                        type: object
+                        properties:
+                          Premium:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/OracleProvider'
+                          Free:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/OracleProvider'
+                          Official:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/OracleProvider'
+                          Dynamic:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/OracleProvider'
+                      total_providers:
+                        type: integer
+                        example: 9
+              examples:
+                providers_example:
+                  summary: Complete provider list with categories
+                  value:
+                    success: true
+                    data:
+                      categories:
+                        Premium:
+                          - id: "chainlink"
+                            name: "Chainlink"
+                            icon: "🔗"
+                            description: "Decentralized oracle network with proven reliability"
+                            category: "Premium"
+                            specialties: ["Crypto prices", "Market data", "Enterprise"]
+                            latency: "300ms"
+                            reliability: "95%"
+                        Free:
+                          - id: "coingecko"
+                            name: "CoinGecko"
+                            icon: "🦎"
+                            description: "Comprehensive cryptocurrency data and market info"
+                            category: "Free"
+                            specialties: ["Crypto prices", "Market cap", "Trading volume"]
+                            latency: "500ms"
+                            reliability: "90%"
+                      total_providers: 9
+
+  /api/oracle-manager/providers/{providerId}:
+    get:
+      tags:
+        - Oracle Manager
+      summary: Get Specific Provider Details
+      parameters:
+        - name: providerId
+          in: path
+          required: true
+          description: Oracle provider ID (coingecko, nasa, weather, etc.)
+          schema:
+            type: string
+            enum: [chainlink, coingecko, dia, wikipedia, weather, exchangerate, sports, nasa]
+          examples:
+            coingecko:
+              value: "coingecko"
+              summary: CoinGecko provider
+            nasa:
+              value: "nasa"
+              summary: NASA provider
+      responses:
+        '200':
+          description: Provider details retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/OracleProvider'
+
+  /api/oracle-manager/query:
+    post:
+      tags:
+        - Oracle Manager
+      summary: Execute Oracle Query
+      description: |
+        Execute an oracle query using specified provider. This is the primary endpoint for getting real-time data from various sources.
+        
+        **Supported Providers:**
+        - `coingecko` - Cryptocurrency prices and market data
+        - `dia` - DIA Oracle network prices (3000+ tokens)
+        - `chainlink` - Premium decentralized price feeds
+        - `weather` - Weather data from OpenWeatherMap
+        - `nasa` - NASA space and astronomy data
+        - `wikipedia` - Wikipedia article summaries
+        - `sports` - NBA and sports statistics
+        - `exchangerate` - Currency exchange rates
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                provider:
+                  type: string
+                  enum: [coingecko, dia, chainlink, weather, nasa, wikipedia, sports, exchangerate]
+                  description: Oracle provider to use
+                query:
+                  type: string
+                  description: Query string to execute
+                userId:
+                  type: string
+                  description: User identifier (optional)
+              required:
+                - provider
+                - query
+            examples:
+              bitcoin_price:
+                summary: Get Bitcoin price from CoinGecko
+                value:
+                  provider: "coingecko"
+                  query: "Bitcoin price"
+                  userId: "user123"
+              weather_query:
+                summary: Get weather data
+                value:
+                  provider: "weather"
+                  query: "Istanbul weather"
+                  userId: "user123"
+              nasa_query:
+                summary: Get NASA space data
+                value:
+                  provider: "nasa"
+                  query: "mars rover photos"
+                  userId: "user123"
+      responses:
+        '200':
+          description: Query executed successfully
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/OracleQueryResponse'
               examples:
-                bitcoin_price:
-                  summary: Bitcoin price query
+                bitcoin_success:
+                  summary: Successful Bitcoin price query
                   value:
                     success: true
                     data:
-                      query: "bitcoin price"
-                      result:
-                        price: 43250.50
-                        symbol: "BTC"
-                        currency: "USD"
-                      confidence: 0.95
-                      consensus_method: "median"
-                      sources: ["chainlink", "coingecko"]
-                      timestamp: 1704067200000
-                      execution_time_ms: 1250
-        '400':
-          description: Invalid query parameters
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '500':
-          description: Internal server error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-
-  /api/oracle/price/{symbol}:
-    get:
-      tags:
-        - Price Data
-      summary: Get Cryptocurrency Price
-      description: |
-        Retrieve real-time cryptocurrency price from multiple oracle sources with consensus validation.
-        
-        **Supported Symbols:**
-        - BTC, ETH, ADA, SOL, DOT, LINK, UNI, AAVE
-        - Most major cryptocurrencies supported by CoinGecko
-      parameters:
-        - name: symbol
-          in: path
-          required: true
-          description: Cryptocurrency symbol (e.g., BTC, ETH, ADA)
-          schema:
-            type: string
-            pattern: '^[A-Z]{2,10}$'
-          examples:
-            bitcoin:
-              value: "BTC"
-              summary: Bitcoin
-            ethereum:
-              value: "ETH" 
-              summary: Ethereum
-            cardano:
-              value: "ADA"
-              summary: Cardano
-        - name: sources
-          in: query
-          required: false
-          description: Comma-separated list of price sources
-          schema:
-            type: string
-            example: "chainlink,coingecko"
-        - name: method
-          in: query
-          required: false
-          description: Price consensus method
-          schema:
-            type: string
-            enum: [median, average, weighted]
-            default: median
-      responses:
-        '200':
-          description: Price data retrieved successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PriceResponse'
-              examples:
-                btc_price:
-                  summary: Bitcoin price with market data
-                  value:
-                    success: true
-                    data:
+                      value: 116317
+                      confidence: 1
+                      method: "median"
+                      sources: ["coingecko"]
+                      timestamp: "2025-08-07T18:39:23.353Z"
+                    query_info:
                       symbol: "BTC"
-                      price: 43250.50
-                      confidence: 0.98
-                      sources: ["chainlink", "coingecko"]
-                      timestamp: 1704067200000
-                      market_data:
-                        market_cap: 847650000000
-                        volume_24h: 28500000000
-                        change_24h: 2.45
-        '404':
-          description: Symbol not found or not supported
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                      answer: "$116,317.00"
+                      query_type: "crypto_price"
+                    blockchain:
+                      transaction_id: "0.0.6496308@1754591955.730571546"
+                      hash: "0x1234...abcd"
+                      network: "hedera-testnet"
+                      verified: true
+                      explorer_link: "https://hashscan.io/testnet/transaction/..."
 
-  /api/oracle/weather/{location}:
-    get:
-      tags:
-        - Weather Data
-      summary: Get Weather Information
-      description: |
-        Retrieve current weather information for a specified location from multiple weather service providers.
-        
-        **Location Formats:**
-        - City names: "Istanbul", "New York", "London"
-        - City, Country: "Paris, France"
-        - Coordinates: "41.0082,28.9784" (lat,lon)
-      parameters:
-        - name: location
-          in: path
-          required: true
-          description: Location name, city, or coordinates
-          schema:
-            type: string
-          examples:
-            city:
-              value: "Istanbul"
-              summary: City name
-            city_country:
-              value: "New York, USA"
-              summary: City with country
-            coordinates:
-              value: "41.0082,28.9784"
-              summary: Latitude, longitude coordinates
-      responses:
-        '200':
-          description: Weather data retrieved successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/WeatherResponse'
-              examples:
-                istanbul_weather:
-                  summary: Istanbul weather data
-                  value:
-                    success: true
-                    data:
-                      location: "Istanbul, Turkey"
-                      temperature: 18.5
-                      feels_like: 17.2
-                      humidity: 65
-                      pressure: 1013.2
-                      visibility: 10
-                      wind:
-                        speed: 12.5
-                        direction: 235
-                      weather:
-                        main: "Clear"
-                        description: "clear sky"
-                        icon: "01d"
-                      confidence: 0.92
-                      sources: ["openweathermap", "weatherapi"]
-                      timestamp: 1704067200000
-        '404':
-          description: Location not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-
-  /api/oracle/providers:
-    get:
-      tags:
-        - System
-      summary: Get Oracle Providers
-      description: |
-        Retrieve information about all available oracle providers, their health status, performance metrics, and reliability scores.
-      responses:
-        '200':
-          description: Provider information retrieved successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ProvidersResponse'
-              examples:
-                providers_list:
-                  summary: Active providers with metrics
-                  value:
-                    success: true
-                    data:
-                      total_providers: 5
-                      active_providers: 4
-                      providers:
-                        - name: "chainlink"
-                          weight: 0.35
-                          reliability: 0.98
-                          latency: 150
-                          healthy: true
-                          metrics:
-                            total_queries: 15420
-                            successful_queries: 15112
-                            success_rate: 0.98
-                            average_latency: 145
-                            last_health_check: 1704067200000
-                        - name: "coingecko"
-                          weight: 0.30
-                          reliability: 0.95
-                          latency: 220
-                          healthy: true
-                          metrics:
-                            total_queries: 12800
-                            successful_queries: 12160
-                            success_rate: 0.95
-                            average_latency: 218
-                            last_health_check: 1704067180000
-
-  /api/oracle/status:
-    get:
-      tags:
-        - System
-      summary: Get System Status
-      description: |
-        Retrieve comprehensive system status including provider health, system metrics, and overall system health.
-      responses:
-        '200':
-          description: System status retrieved successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SystemStatusResponse'
-              examples:
-                system_status:
-                  summary: System status overview
-                  value:
-                    success: true
-                    data:
-                      system:
-                        total_providers: 5
-                        active_providers: 4
-                        system_health: 0.94
-                        last_check: 1704067200000
-                      providers:
-                        chainlink:
-                          status: "healthy"
-                          last_response: 145
-                        coingecko:
-                          status: "healthy"
-                          last_response: 220
-                        weatherapi:
-                          status: "degraded"
-                          last_response: 850
-                      health_status:
-                        chainlink: true
-                        coingecko: true
-                        weatherapi: false
-                        webscraping: true
-                        customapi: true
-                      chatbots: null
-                      uptime: 99.85
-                      timestamp: "2024-01-01T10:00:00.000Z"
-
-  /api/oracle/health-check:
+  /api/oracle-manager/bulk-query:
     post:
       tags:
-        - Health
-      summary: Trigger Health Check
+        - Oracle Manager
+      summary: Execute Multiple Queries in Batch
       description: |
-        Manually trigger a health check for all oracle providers and return the results.
-      responses:
-        '200':
-          description: Health check completed successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HealthCheckResponse'
-              examples:
-                health_check_result:
-                  summary: Health check results
-                  value:
-                    success: true
-                    data:
-                      timestamp: 1704067200000
-                      results:
-                        chainlink:
-                          healthy: true
-                          response_time: 145
-                          last_error: null
-                        coingecko:
-                          healthy: true
-                          response_time: 220
-                          last_error: null
-                        weatherapi:
-                          healthy: false
-                          response_time: null
-                          last_error: "Connection timeout"
-        '500':
-          description: Health check failed
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-
-  /api/oracle/sports/{query}:
-    get:
-      tags:
-        - Sports Data
-      summary: Get Sports Information
-      description: |
-        Retrieve sports data including NBA player stats, team information, game schedules, and league data from multiple sports databases.
-        
-        **Query Examples:**
-        - Team names: "Lakers", "Golden State Warriors", "Manchester United"
-        - Player names: "LeBron James", "Stephen Curry", "Lionel Messi"
-        - General queries: "NBA schedule", "Premier League standings"
-      parameters:
-        - name: query
-          in: path
-          required: true
-          description: Sports query (team, player, league, or general sports query)
-          schema:
-            type: string
-          examples:
-            team:
-              value: "Lakers"
-              summary: NBA team query
-            player:
-              value: "LeBron James"
-              summary: NBA player query
-            schedule:
-              value: "NBA games"
-              summary: NBA games schedule
-      responses:
-        '200':
-          description: Sports data retrieved successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SportsResponse'
-        '404':
-          description: Sports data not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-
-  /api/oracle/dia/{symbol}:
-    get:
-      tags:
-        - Price Data
-      summary: Get DIA Oracle Price Data
-      description: |
-        Retrieve cryptocurrency price data from DIA (Decentralised Information Asset) oracle network.
-      parameters:
-        - name: symbol
-          in: path
-          required: true
-          description: Cryptocurrency symbol (e.g., BTC, ETH)
-          schema:
-            type: string
-            pattern: '^[A-Z]{2,10}$'
-      responses:
-        '200':
-          description: DIA price data retrieved successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PriceResponse'
-
-  /api/oracle/exchangerate/{from}/{to}:
-    get:
-      tags:
-        - Exchange Rate Data
-      summary: Get Currency Exchange Rates
-      description: |
-        Retrieve real-time currency exchange rates between any two currencies.
-        
-        **Supported Currencies:**
-        - Major currencies: USD, EUR, GBP, JPY, AUD, CAD, CHF
-        - Cryptocurrencies: BTC, ETH, ADA, SOL
-      parameters:
-        - name: from
-          in: path
-          required: true
-          description: Base currency code
-          schema:
-            type: string
-            pattern: '^[A-Z]{3}$'
-          examples:
-            usd:
-              value: "USD"
-              summary: US Dollar
-            eur:
-              value: "EUR"
-              summary: Euro
-        - name: to
-          in: path
-          required: true
-          description: Target currency code
-          schema:
-            type: string
-            pattern: '^[A-Z]{3}$'
-          examples:
-            eur:
-              value: "EUR"
-              summary: Euro
-            gbp:
-              value: "GBP"
-              summary: British Pound
-      responses:
-        '200':
-          description: Exchange rate retrieved successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ExchangeRateResponse'
-
-  /api/oracle/nasa/{query}:
-    get:
-      tags:
-        - NASA Data
-      summary: Get NASA Space Data
-      description: |
-        Retrieve NASA space data including Astronomy Picture of the Day (APOD), Mars rover photos, and space mission information.
-        
-        **Query Types:**
-        - "apod" or "astronomy picture" - Get Astronomy Picture of the Day
-        - "mars" or "rover" - Get Mars rover images
-        - "iss" or "space station" - Get ISS information
-      parameters:
-        - name: query
-          in: path
-          required: true
-          description: NASA data query type
-          schema:
-            type: string
-          examples:
-            apod:
-              value: "apod"
-              summary: Astronomy Picture of the Day
-            mars:
-              value: "mars rover"
-              summary: Mars rover images
-      responses:
-        '200':
-          description: NASA data retrieved successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/NASAResponse'
-
-  /api/oracle/wikipedia/{query}:
-    get:
-      tags:
-        - Wikipedia Data
-      summary: Get Wikipedia Information
-      description: |
-        Retrieve Wikipedia article summaries and information on any topic.
-        
-        **Examples:**
-        - "Bitcoin" - Get Bitcoin Wikipedia summary
-        - "Artificial Intelligence" - Get AI article
-        - "Istanbul" - Get city information
-      parameters:
-        - name: query
-          in: path
-          required: true
-          description: Wikipedia search query
-          schema:
-            type: string
-          examples:
-            crypto:
-              value: "Bitcoin"
-              summary: Bitcoin article
-            tech:
-              value: "Artificial Intelligence"
-              summary: AI article
-      responses:
-        '200':
-          description: Wikipedia data retrieved successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/WikipediaResponse'
-
-  /api/oracle/batch:
-    post:
-      tags:
-        - Oracle Query
-      summary: Batch Query
-      description: |
-        Execute multiple oracle queries in a single request for improved efficiency.
+        Execute multiple oracle queries in a single request for improved efficiency and reduced latency.
       requestBody:
         required: true
         content:
@@ -607,85 +265,669 @@ paths:
                 queries:
                   type: array
                   items:
-                    $ref: '#/components/schemas/BatchQueryItem'
+                    type: object
+                    properties:
+                      provider:
+                        type: string
+                      query:
+                        type: string
+                    required:
+                      - provider
+                      - query
+                userId:
+                  type: string
               required:
                 - queries
             examples:
-              multiple_queries:
-                summary: Multiple data queries
+              multi_query:
+                summary: Multiple data sources
                 value:
                   queries:
-                    - query: "bitcoin price"
-                      sources: ["chainlink", "coingecko"]
-                      method: "median"
-                    - query: "weather in Istanbul"
-                      timeout: 5000
-                    - query: "ethereum news"
-                      sources: ["webscraping"]
+                    - provider: "coingecko"
+                      query: "Bitcoin price"
+                    - provider: "weather"
+                      query: "London weather"
+                    - provider: "nasa"
+                      query: "astronomy picture"
+                  userId: "user123"
       responses:
         '200':
           description: Batch queries executed successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BatchQueryResponse'
-              examples:
-                batch_results:
-                  summary: Batch query results
-                  value:
-                    success: true
-                    data:
-                      total_queries: 3
-                      successful_queries: 2
-                      failed_queries: 1
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
                       results:
-                        - query: "bitcoin price"
-                          success: true
-                          data:
-                            price: 43250.50
-                            confidence: 0.98
-                          execution_time_ms: 450
-                        - query: "weather in Istanbul"
-                          success: true
-                          data:
-                            temperature: 18.5
-                            weather: "Clear"
-                          execution_time_ms: 380
-                        - query: "ethereum news"
-                          success: false
-                          error: "Source temporarily unavailable"
-                          execution_time_ms: 5000
-        '400':
-          description: Invalid batch query format
+                        type: array
+                        items:
+                          type: object
+                      total_processed:
+                        type: integer
+                      successful:
+                        type: integer
+                      failed:
+                        type: integer
+
+  /api/oracle-manager/health:
+    get:
+      tags:
+        - Oracle Manager
+      summary: Get System Health Status
+      description: |
+        Retrieve comprehensive system health including provider status and blockchain connectivity.
+      responses:
+        '200':
+          description: Health status retrieved successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      total_oracles:
+                        type: integer
+                        example: 8
+                      healthy_oracles:
+                        type: integer
+                        example: 8
+                      system_health:
+                        type: number
+                        format: float
+                        example: 1.0
+                      blockchain_status:
+                        type: string
+                        example: "hedera_connected"
+                      last_updated:
+                        type: string
+                        format: date-time
+
+  /api/oracle-manager/stats:
+    get:
+      tags:
+        - Oracle Manager
+      summary: Get Detailed System Statistics
+      description: |
+        Retrieve detailed statistics about oracle providers, system performance, and usage metrics.
+      responses:
+        '200':
+          description: Statistics retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      system_health:
+                        type: object
+                      provider_breakdown:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            category:
+                              type: string
+                            count:
+                              type: integer
+                            providers:
+                              type: array
+                              items:
+                                type: object
+                      total_categories:
+                        type: integer
+                      total_providers:
+                        type: integer
+
+  /api/oracle-manager/recommendations:
+    post:
+      tags:
+        - Oracle Manager
+      summary: Get Oracle Provider Recommendations
+      description: |
+        Get smart recommendations for oracle providers based on query type and requirements.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                query:
+                  type: string
+                  description: Query to analyze for recommendations
+              required:
+                - query
+            examples:
+              crypto_recommendation:
+                summary: Get recommendations for crypto query
+                value:
+                  query: "bitcoin price analysis"
+      responses:
+        '200':
+          description: Recommendations retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      query:
+                        type: string
+                      recommendations:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/OracleProvider'
+                      total_recommended:
+                        type: integer
+
+  # ============= HASHSCAN EXPLORER API =============
+  /api/hashscan/transaction/{transactionId}:
+    get:
+      tags:
+        - HashScan Explorer
+      summary: Get Transaction Details
+      description: |
+        Retrieve detailed information about a blockchain transaction using real-time HCS lookup and Mirror Node API.
+        
+        **Transaction ID Format**: `accountId@timestamp.nanoseconds`
+        Example: `0.0.6496308@1754591955.730571546`
+      parameters:
+        - name: transactionId
+          in: path
+          required: true
+          description: Hedera transaction ID
+          schema:
+            type: string
+            pattern: '^0\.0\.\d+@\d+\.\d+$'
+          examples:
+            oracle_transaction:
+              value: "0.0.6496308@1754591955.730571546"
+              summary: Oracle query transaction
+      responses:
+        '200':
+          description: Transaction details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HashScanTransactionResponse'
+
+  /api/hashscan/search/{query}:
+    get:
+      tags:
+        - HashScan Explorer
+      summary: Search Transactions and Oracle Queries
+      description: |
+        Search for transactions, accounts, topics, and oracle queries across the Hedera network.
+        
+        **Search Types:**
+        - Transaction IDs (format: account@timestamp)
+        - Account IDs (format: 0.0.xxxxx)
+        - Topic IDs (format: 0.0.xxxxx)
+        - Oracle query content (bitcoin, weather, nasa, etc.)
+      parameters:
+        - name: query
+          in: path
+          required: true
+          description: Search query
+          schema:
+            type: string
+          examples:
+            transaction_search:
+              value: "0.0.6496308@1754591955.730571546"
+              summary: Search by transaction ID
+            content_search:
+              value: "bitcoin"
+              summary: Search oracle queries
+        - name: limit
+          in: query
+          description: Maximum results to return
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+            maximum: 100
+        - name: offset
+          in: query
+          description: Results offset for pagination
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+      responses:
+        '200':
+          description: Search results retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HashScanSearchResponse'
+
+  /api/hashscan/recent:
+    get:
+      tags:
+        - HashScan Explorer
+      summary: Get Recent Transactions and Oracle Activities
+      description: |
+        Retrieve recent blockchain transactions and oracle activities from HCS topics.
+      parameters:
+        - name: limit
+          in: query
+          description: Maximum activities to return
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+      responses:
+        '200':
+          description: Recent activities retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HashScanRecentResponse'
+
+  /api/hashscan/browse:
+    get:
+      tags:
+        - HashScan Explorer
+      summary: Browse Oracle Transactions by Category
+      description: |
+        Browse and filter oracle transactions by provider type or category.
+        
+        **Available Categories:**
+        - `all` - All transactions
+        - `crypto` - Cryptocurrency queries
+        - `weather` - Weather queries
+        - `nasa` - NASA space data
+        - `sports` - Sports data
+        - `wikipedia` - Wikipedia queries
+      parameters:
+        - name: category
+          in: query
+          description: Transaction category to browse
+          schema:
+            type: string
+            enum: [all, crypto, weather, nasa, sports, wikipedia]
+            default: all
+        - name: provider
+          in: query
+          description: Specific provider to filter by
+          schema:
+            type: string
+            enum: [coingecko, dia, chainlink, weather, nasa, sports, wikipedia, exchangerate]
+        - name: limit
+          in: query
+          description: Maximum transactions to return
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+            maximum: 50
+      responses:
+        '200':
+          description: Browse results retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HashScanBrowseResponse'
+
+  /api/hashscan/stats:
+    get:
+      tags:
+        - HashScan Explorer
+      summary: Get HashScan Statistics and System Overview
+      description: |
+        Retrieve comprehensive statistics about the HashScan explorer system, HCS topics, and oracle activities.
+      responses:
+        '200':
+          description: Statistics retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HashScanStatsResponse'
+
+  /api/hashscan/verify/{hash}:
+    get:
+      tags:
+        - HashScan Explorer
+      summary: Verify Blockchain Hash
+      description: |
+        Verify a blockchain hash using Hedera Mirror Node API and return detailed verification information.
+      parameters:
+        - name: hash
+          in: path
+          required: true
+          description: Blockchain hash to verify
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Hash verified successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HashScanVerifyResponse'
+
+  # ============= ACCOUNT MANAGEMENT API =============
+  /api/account/info:
+    get:
+      tags:
+        - Account Management
+      summary: Get Account Information
+      description: |
+        Retrieve user account information including ledger balance and transaction history.
+      responses:
+        '200':
+          description: Account information retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  accountInfo:
+                    type: object
+                    properties:
+                      ledgerInfo:
+                        type: array
+                        items:
+                          type: string
+                      infers:
+                        type: array
+                        items:
+                          type: array
+                      fines:
+                        type: array
+
+  # ============= AI SERVICES API =============
+  /api/services/list:
+    get:
+      tags:
+        - AI Services
+      summary: Get Available AI Services
+      description: |
+        Retrieve list of available AI services including chatbots and inference models.
+      responses:
+        '200':
+          description: AI services retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  services:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        name:
+                          type: string
+                        modelName:
+                          type: string
+                        isOfficial:
+                          type: boolean
+                        isVerifiable:
+                          type: boolean
+
+  /api/services/query:
+    post:
+      tags:
+        - AI Services
+      summary: Execute AI Service Query
+      description: |
+        Execute a query against available AI services and models.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                service:
+                  type: string
+                query:
+                  type: string
+                parameters:
+                  type: object
+              required:
+                - service
+                - query
+      responses:
+        '200':
+          description: AI query executed successfully
+
+  # ============= ANALYTICS API =============
+  /api/analytics/health:
+    get:
+      tags:
+        - Analytics
+      summary: Get Network Health Analytics
+      description: |
+        Retrieve network health analytics including node status, uptime, and performance metrics.
+      responses:
+        '200':
+          description: Analytics retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      totalNodes:
+                        type: integer
+                      activeNodes:
+                        type: integer
+                      totalStake:
+                        type: number
+                      averageStake:
+                        type: number
+                      networkUptime:
+                        type: number
+                      lastBlockTime:
+                        type: string
+
+  # ============= HFS STORAGE API =============
+  /api/hfs/license/store:
+    post:
+      tags:
+        - HFS Storage
+      summary: Store Document on Hedera File Service
+      description: |
+        Store license documents or files on Hedera File Service with metadata.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                document:
+                  type: string
+                  format: binary
+                  description: Document file to upload
+                licenseData:
+                  type: string
+                  description: JSON metadata for the document
+              required:
+                - document
+                - licenseData
+      responses:
+        '200':
+          description: Document stored successfully
+
+  /api/hfs/stats:
+    get:
+      tags:
+        - HFS Storage
+      summary: Get HFS Storage Statistics
+      description: |
+        Retrieve statistics about Hedera File Service usage and storage metrics.
+      responses:
+        '200':
+          description: HFS statistics retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      storage:
+                        type: object
+                        properties:
+                          totalFiles:
+                            type: integer
+                          totalSize:
+                            type: integer
+                          activeVerifications:
+                            type: integer
+                          expiredDocuments:
+                            type: integer
+                      system:
+                        type: object
+                        properties:
+                          isReady:
+                            type: boolean
+                          timestamp:
+                            type: string
+
+  # ============= SMART CONTRACTS API =============
+  /api/contracts/deploy:
+    post:
+      tags:
+        - Smart Contracts
+      summary: Deploy Smart Contract
+      description: |
+        Deploy a smart contract to the Hedera network with specified parameters.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                contractName:
+                  type: string
+                  description: Name of the contract to deploy
+                constructorParams:
+                  type: array
+                  description: Constructor parameters
+                initialBalance:
+                  type: number
+                  description: Initial HBAR balance for the contract
+              required:
+                - contractName
+      responses:
+        '200':
+          description: Contract deployed successfully
+
+  # ============= HCS CONSENSUS API =============
+  /api/hcs/topics:
+    get:
+      tags:
+        - HCS Consensus
+      summary: Get HCS Topic Information
+      description: |
+        Retrieve information about available HCS topics including Oracle queries, compute operations, and system metrics.
+      responses:
+        '200':
+          description: HCS topics retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      topics:
+                        type: object
+                      ready:
+                        type: boolean
+                      network:
+                        type: string
 
 components:
   schemas:
+    OracleProvider:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique provider identifier
+        name:
+          type: string
+          description: Human-readable provider name
+        icon:
+          type: string
+          description: Provider emoji icon
+        description:
+          type: string
+          description: Provider description
+        category:
+          type: string
+          enum: [Premium, Free, Official, Dynamic]
+        specialties:
+          type: array
+          items:
+            type: string
+          description: Provider specialties and capabilities
+        latency:
+          type: string
+          description: Average response time
+        reliability:
+          type: string
+          description: Reliability percentage
+
     OracleQueryResponse:
       type: object
       properties:
         success:
           type: boolean
-          description: Indicates if the query was successful
+          description: Query execution status
         data:
           type: object
           properties:
-            query:
-              type: string
-              description: Original query string
-            result:
-              type: object
-              description: Query result data
+            value:
+              type: number
+              description: Primary result value
             confidence:
               type: number
               format: float
               minimum: 0
               maximum: 1
               description: Confidence score of the result
-            consensus_method:
+            method:
               type: string
               description: Consensus method used
             sources:
@@ -694,422 +936,276 @@ components:
                 type: string
               description: Data sources used
             timestamp:
-              type: integer
-              format: int64
-              description: Unix timestamp of the query
-            execution_time_ms:
-              type: integer
-              description: Query execution time in milliseconds
+              type: string
+              format: date-time
+        query_info:
+          type: object
+          description: Parsed query information
+        blockchain:
+          type: object
+          properties:
+            transaction_id:
+              type: string
+              description: Hedera transaction ID
+            hash:
+              type: string
+              description: Transaction hash
+            network:
+              type: string
+              description: Blockchain network
+            verified:
+              type: boolean
+              description: Verification status
+            explorer_link:
+              type: string
+              format: uri
+              description: Blockchain explorer link
         metadata:
           type: object
           description: Additional metadata
-        error:
-          type: string
-          description: Error message if query failed
 
-    PriceResponse:
+    HashScanTransactionResponse:
       type: object
       properties:
         success:
           type: boolean
-        data:
+        transaction:
           type: object
           properties:
-            symbol:
+            id:
               type: string
-              description: Cryptocurrency symbol
-            price:
-              type: number
-              format: float
-              description: Current price in USD
-            confidence:
-              type: number
-              format: float
-              minimum: 0
-              maximum: 1
-            sources:
-              type: array
-              items:
-                type: string
+              description: Transaction ID
+            type:
+              type: string
+              description: Transaction type
+            status:
+              type: string
+              description: Transaction status
             timestamp:
               type: integer
               format: int64
-            market_data:
-              type: object
-              properties:
-                market_cap:
-                  type: number
-                  format: float
-                volume_24h:
-                  type: number
-                  format: float
-                change_24h:
-                  type: number
-                  format: float
-        error:
-          type: string
-
-    WeatherResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
-        data:
-          type: object
-          properties:
-            location:
+              description: Transaction timestamp
+            network:
               type: string
-            temperature:
-              type: number
-              format: float
-              description: Temperature in Celsius
-            feels_like:
-              type: number
-              format: float
-            humidity:
-              type: integer
-              minimum: 0
-              maximum: 100
-              description: Humidity percentage
-            pressure:
-              type: number
-              format: float
-              description: Atmospheric pressure in hPa
-            visibility:
-              type: number
-              format: float
-              description: Visibility in kilometers
-            wind:
+              description: Network name
+            details:
               type: object
-              properties:
-                speed:
-                  type: number
-                  format: float
-                  description: Wind speed in km/h
-                direction:
-                  type: integer
-                  minimum: 0
-                  maximum: 360
-                  description: Wind direction in degrees
-            weather:
-              type: object
-              properties:
-                main:
-                  type: string
-                description:
-                  type: string
-                icon:
-                  type: string
-            confidence:
-              type: number
-              format: float
-            sources:
-              type: array
-              items:
-                type: string
-            timestamp:
-              type: integer
-              format: int64
-        error:
-          type: string
-
-    ProvidersResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
-        data:
-          type: object
-          properties:
-            total_providers:
-              type: integer
-            active_providers:
-              type: integer
-            providers:
-              type: array
-              items:
-                type: object
-                properties:
-                  name:
-                    type: string
-                  weight:
-                    type: number
-                    format: float
-                  reliability:
-                    type: number
-                    format: float
-                  latency:
-                    type: integer
-                    description: Average latency in milliseconds
-                  healthy:
-                    type: boolean
-                  metrics:
-                    type: object
-                    properties:
-                      total_queries:
-                        type: integer
-                      successful_queries:
-                        type: integer
-                      success_rate:
-                        type: number
-                        format: float
-                      average_latency:
-                        type: integer
-                      last_health_check:
-                        type: integer
-                        format: int64
-        error:
-          type: string
-
-    SystemStatusResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
-        data:
-          type: object
-          properties:
-            system:
-              type: object
-              properties:
-                total_providers:
-                  type: integer
-                active_providers:
-                  type: integer
-                system_health:
-                  type: number
-                  format: float
-                last_check:
-                  type: integer
-                  format: int64
-            providers:
-              type: array
-              items:
-                type: object
-            health_status:
-              type: object
-              additionalProperties:
-                type: boolean
-            chatbots:
-              type: object
-              nullable: true
-            uptime:
-              type: number
-              format: float
-              description: System uptime percentage
-            timestamp:
+              description: Transaction details
+            blockchain_hash:
               type: string
-              format: date-time
-        error:
+              description: Blockchain hash
+            explorer_url:
+              type: string
+              format: uri
+              description: External explorer URL
+            source:
+              type: string
+              description: Data source (HCS_REAL_TIME or MIRROR_NODE)
+        hashscan_url:
           type: string
+          format: uri
+          description: HashScan explorer URL
 
-    HealthCheckResponse:
+    HashScanSearchResponse:
       type: object
       properties:
         success:
           type: boolean
-        data:
-          type: object
-          properties:
-            timestamp:
-              type: integer
-              format: int64
-            results:
-              type: object
-              additionalProperties:
-                type: object
-                properties:
-                  healthy:
-                    type: boolean
-                  response_time:
-                    type: integer
-                    nullable: true
-                  last_error:
-                    type: string
-                    nullable: true
-        error:
-          type: string
-
-    BatchQueryItem:
-      type: object
-      properties:
         query:
           type: string
-        sources:
-          type: array
-          items:
-            type: string
-        method:
-          type: string
-        timeout:
-          type: integer
-      required:
-        - query
-
-    BatchQueryResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
-        data:
+          description: Original search query
+        results:
           type: object
           properties:
-            total_queries:
-              type: integer
-            successful_queries:
-              type: integer
-            failed_queries:
-              type: integer
-            results:
+            transactions:
               type: array
               items:
                 type: object
-                properties:
-                  query:
-                    type: string
-                  success:
-                    type: boolean
-                  data:
-                    type: object
-                  error:
-                    type: string
-                  execution_time_ms:
-                    type: integer
-        error:
-          type: string
-
-    SportsResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
-        data:
+            oracle_queries:
+              type: array
+              items:
+                type: object
+            accounts:
+              type: array
+              items:
+                type: object
+            topics:
+              type: array
+              items:
+                type: object
+        metadata:
           type: object
           properties:
-            type:
-              type: string
-              description: Type of sports data (team, player, league, games)
-            team_name:
-              type: string
-              description: Team name (for team queries)
-            player_name:
-              type: string
-              description: Player name (for player queries)
-            sport:
-              type: string
-              description: Sport type
-            league:
-              type: string
-              description: League name
-            description:
-              type: string
-              description: Detailed description
-            source:
-              type: string
-              description: Data source (thesportsdb, balldontlie)
-            timestamp:
+            total:
               type: integer
-              format: int64
-        error:
-          type: string
-
-    ExchangeRateResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
-        data:
-          type: object
-          properties:
-            from_currency:
-              type: string
-              description: Base currency code
-            to_currency:
-              type: string
-              description: Target currency code
-            exchange_rate:
-              type: number
-              format: float
-              description: Exchange rate
-            amount:
-              type: number
-              format: float
-              description: Converted amount
-            source:
-              type: string
-              description: Exchange rate data source
-            timestamp:
+            limit:
               type: integer
-              format: int64
-        error:
-          type: string
+            offset:
+              type: integer
+            search_types:
+              type: array
+              items:
+                type: string
 
-    NASAResponse:
+    HashScanRecentResponse:
       type: object
       properties:
         success:
           type: boolean
-        data:
+        activities:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                description: Activity type
+              timestamp:
+                type: string
+                description: Activity timestamp
+              sequence_number:
+                type: integer
+                description: HCS sequence number
+              transaction_id:
+                type: string
+                description: Transaction ID
+              content:
+                type: object
+                description: Activity content
+              explorer_url:
+                type: string
+                format: uri
+                description: Explorer URL
+              topic_id:
+                type: string
+                description: HCS topic ID
+        metadata:
+          type: object
+
+    HashScanBrowseResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        category:
+          type: string
+          description: Selected category
+        provider:
+          type: string
+          description: Selected provider
+        transactions:
+          type: array
+          items:
+            type: object
+            properties:
+              transaction_id:
+                type: string
+              timestamp:
+                type: string
+              sequence_number:
+                type: integer
+              query:
+                type: string
+              provider:
+                type: string
+              value:
+                type: number
+              confidence:
+                type: number
+              explorer_url:
+                type: string
+                format: uri
+              content:
+                type: object
+        metadata:
+          type: object
+
+    HashScanStatsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        network:
           type: object
           properties:
-            type:
+            name:
               type: string
-              description: NASA data type (apod, mars_rover, etc.)
-            title:
+              example: "Hedera Testnet"
+            status:
               type: string
-              description: Title of the content
-            description:
-              type: string
-              description: Content description
-            url:
+              example: "active"
+            explorer_url:
               type: string
               format: uri
-              description: Image or content URL
-            date:
+        hcs_topic:
+          type: object
+          properties:
+            id:
               type: string
-              format: date
-              description: Content date
-            source:
-              type: string
-              description: NASA API source
-            timestamp:
+              description: HCS topic ID
+            message_count:
               type: integer
-              format: int64
-        error:
-          type: string
+              description: Total messages in topic
+            recent_activity:
+              type: string
+              description: Last activity timestamp
+        oracle_system:
+          type: object
+          properties:
+            active_providers:
+              type: integer
+            total_queries_logged:
+              type: integer
+            system_health:
+              type: number
+              format: float
+        api_endpoints:
+          type: object
+          description: Available API endpoints
+        timestamp:
+          type: integer
+          format: int64
 
-    WikipediaResponse:
+    HashScanVerifyResponse:
       type: object
       properties:
         success:
           type: boolean
-        data:
+        verification:
           type: object
           properties:
-            title:
+            hash:
               type: string
-              description: Wikipedia article title
-            summary:
+            verified:
+              type: boolean
+            network:
               type: string
-              description: Article summary
-            url:
-              type: string
-              format: uri
-              description: Wikipedia article URL
-            extract:
-              type: string
-              description: Article extract/content
-            page_id:
-              type: integer
-              description: Wikipedia page ID
-            source:
-              type: string
-              description: Wikipedia API source
             timestamp:
               type: integer
               format: int64
-        error:
-          type: string
+            type:
+              type: string
+            status:
+              type: string
+            confirmations:
+              type: integer
+            transaction_id:
+              type: string
+            gas_used:
+              type: string
+            fee:
+              type: number
+            details:
+              type: object
+        explorer_links:
+          type: object
+          properties:
+            hedera:
+              type: string
+              format: uri
+            internal:
+              type: string
+              format: uri
 
     ErrorResponse:
       type: object

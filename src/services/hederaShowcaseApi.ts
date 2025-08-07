@@ -9,7 +9,7 @@ export interface HCSMessage {
   id: string
   timestamp: string
   type: 'oracle_query' | 'consensus_result' | 'health_check' | 'system_metrics'
-  data: any
+  data: Record<string, unknown>
   txId: string
   topicId: string
 }
@@ -59,7 +59,7 @@ export interface HashScanTransaction {
   timestamp: string
   fee: string
   explorer_url: string
-  details?: any
+  details?: Record<string, unknown>
 }
 
 export interface NetworkStats {
@@ -116,10 +116,10 @@ class HederaShowcaseApiService {
         
         if (hcsData.success && hcsData.data?.transactions) {
           // Transform real HCS transactions to frontend format
-          return hcsData.data.transactions.map((tx: any) => ({
+          return hcsData.data.transactions.map((tx: Record<string, unknown>) => ({
             id: tx.transactionId || `tx-${Date.now()}`,
             timestamp: tx.timestamp,
-            type: tx.type.toLowerCase().replace('_', '_') as any,
+            type: (tx.type?.toString().toLowerCase().replace('_', '_') || 'oracle_query') as HashScanTransaction['type'],
             data: tx.data,
             txId: tx.transactionId,
             topicId: tx.topicId
@@ -152,13 +152,13 @@ class HederaShowcaseApiService {
             system_health: statusData.data.system.system_health,
             uptime: statusData.data.uptime
           },
-          txId: `0.0.${Math.random().toString().substr(2, 8)}@${Date.now() / 1000}.${Math.random().toString(36).substr(2, 9)}`,
+          txId: statusData.data.latest_transaction_id || 'N/A',
           topicId: '0.0.4629584'
         });
       }
 
       if (providersData.success && providersData.data?.providers) {
-        providersData.data.providers.slice(0, Math.min(3, limit - 1)).forEach((provider: any, index: number) => {
+        providersData.data.providers.slice(0, Math.min(3, limit - 1)).forEach((provider: Record<string, unknown>, index: number) => {
           messages.push({
             id: `health-${Date.now()}-${index}`,
             timestamp: new Date(Date.now() - (index + 1) * 5000).toISOString(),
@@ -167,9 +167,9 @@ class HederaShowcaseApiService {
               provider: provider.name,
               status: provider.healthy ? 'healthy' : 'degraded',
               latency: `${provider.latency}ms`,
-              success_rate: `${Math.round(provider.reliability * 100)}%`
+              success_rate: `${Math.round((provider.reliability as number) * 100)}%`
             },
-            txId: `0.0.${Math.random().toString().substr(2, 8)}@${Date.now() / 1000}.${Math.random().toString(36).substr(2, 9)}`,
+            txId: `health-check-${Date.now()}-${index}`,
             topicId: '0.0.4629583'
           });
         });
@@ -203,14 +203,14 @@ class HederaShowcaseApiService {
           {
             function: 'updatePrice("BTC", 9425000)',
             timestamp: new Date(Date.now() - 30000).toISOString(),
-            txId: `0.0.${Math.random().toString().substr(2, 8)}@${Date.now() / 1000}`,
+            txId: `contract-exec-${Date.now()}`,
             gasUsed: '45,293',
             status: 'success'
           },
           {
             function: 'updatePrice("ETH", 368145)',
             timestamp: new Date(Date.now() - 60000).toISOString(),
-            txId: `0.0.${Math.random().toString().substr(2, 8)}@${Date.now() / 1000}`,
+            txId: `contract-exec-${Date.now() + 30000}`,
             gasUsed: '43,128',
             status: 'success'
           }
@@ -304,22 +304,22 @@ class HederaShowcaseApiService {
       const transactions: HashScanTransaction[] = [];
 
       if (providersData.success && providersData.data?.providers) {
-        providersData.data.providers.slice(0, limit).forEach((provider: any, index: number) => {
+        providersData.data.providers.slice(0, limit).forEach((provider: Record<string, unknown>, index: number) => {
           const txTypes = ['oracle_query', 'consensus_submit', 'contract_call', 'file_create'];
-          const type = txTypes[index % txTypes.length] as any;
+          const type = txTypes[index % txTypes.length] as HashScanTransaction['type'];
           
           transactions.push({
             id: `tx-${index + 1}`,
             type,
-            hash: `0.0.${Math.random().toString().substr(2, 8)}@${Date.now() / 1000}.${Math.random().toString(36).substr(2, 9)}`,
+            hash: `tx-${(provider.name as string).toLowerCase()}-${Date.now()}`,
             status: provider.healthy ? 'success' : 'pending',
             timestamp: new Date(Date.now() - (index + 1) * 30000).toISOString(),
             fee: (0.0001 + Math.random() * 0.001).toFixed(4),
-            explorer_url: `https://hashscan.io/testnet/transaction/0.0.${Math.random().toString().substr(2, 8)}`,
+            explorer_url: `https://hashscan.io/testnet/transaction/tx-${(provider.name as string).toLowerCase()}-${Date.now()}`,
             details: {
-              provider: provider.name,
-              latency: provider.latency,
-              success_rate: Math.round(provider.reliability * 100)
+              provider: provider.name as string,
+              latency: provider.latency as number,
+              success_rate: Math.round((provider.reliability as number) * 100)
             }
           });
         });
@@ -346,7 +346,7 @@ class HederaShowcaseApiService {
       const statusData = await statusResponse.json();
       const providersData = await providersResponse.json();
 
-      let stats: NetworkStats = {
+      const stats: NetworkStats = {
         currentTPS: 3247,
         peakTPS24h: 10000,
         avgFinality: '2.8s',
@@ -363,7 +363,7 @@ class HederaShowcaseApiService {
       }
 
       if (providersData.success && providersData.data) {
-        const avgReliability = providersData.data.providers?.reduce((acc: number, p: any) => acc + p.reliability, 0) / (providersData.data.providers?.length || 1);
+        const avgReliability = providersData.data.providers?.reduce((acc: number, p: Record<string, unknown>) => acc + Number(p.reliability || 0), 0) / (providersData.data.providers?.length || 1);
         stats.successRate = Math.round(avgReliability * 100 * 100) / 100;
       }
 
@@ -394,6 +394,7 @@ class HederaShowcaseApiService {
       ]);
 
       const statusData = await statusResponse.json();
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const providersData = await providersResponse.json();
 
       const analytics: HederaAnalyticsData = {
