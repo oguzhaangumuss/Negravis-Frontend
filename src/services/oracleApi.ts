@@ -256,7 +256,7 @@ class OracleApiService {
             explorer_link: `https://hashscan.io/testnet/transaction/${encodeURIComponent(transactionId)}`
           },
           // Redirect to local hashscan page first to show all data
-          hashscan_url: `http://localhost:3000/hashscan?id=${encodeURIComponent(transactionId)}`
+          hashscan_url: `https://negravis-frontend.vercel.app/hashscan?id=${encodeURIComponent(transactionId)}`
         };
         
         // Use backend query_info if available, otherwise create enhanced query_info for better UI formatting
@@ -459,7 +459,7 @@ class OracleApiService {
       if (data.success && data.query) {
         // Get current frontend URL (for localhost:3000 or production)
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const frontendUrl = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
+        const frontendUrl = typeof window !== 'undefined' ? window.location.origin : 'https://negravis-frontend.vercel.app';
         
         // Transform backend response to match frontend interface
         const transformedQuery: HashscanQueryResult = {
