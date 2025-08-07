@@ -81,6 +81,18 @@ function HashscanPageContent() {
       const result = await oracleApi.getHashscanTransaction(transactionId)
       if (result.success && result.data) {
         setTransactionResult(result.data)
+        
+        // If transaction has oracle_data, also try to get full query result
+        if (result.data.oracle_data) {
+          try {
+            const queryResult = await oracleApi.searchHashscan(result.data.oracle_data.query || transactionId)
+            if (queryResult.success && queryResult.data) {
+              setQueryResult(queryResult.data)
+            }
+          } catch (queryErr) {
+            console.log('Could not fetch additional query data:', queryErr)
+          }
+        }
       } else {
         setError(result.error || 'Failed to fetch transaction data')
       }
