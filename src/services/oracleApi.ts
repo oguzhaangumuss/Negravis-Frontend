@@ -3,7 +3,7 @@
  * Frontend service for interacting with backend Oracle APIs
  */
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://negravis-app.vercel.app';
 
 export interface OracleQueryResponse {
   success: boolean;

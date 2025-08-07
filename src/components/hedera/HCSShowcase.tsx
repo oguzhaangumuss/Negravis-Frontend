@@ -55,7 +55,7 @@ export default function HCSShowcase() {
     setIsLoading(true)
     try {
       // Try to trigger a real HCS test message first
-      const hcsTestResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001'}/api/hcs/test-message`, {
+      const hcsTestResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://negravis-app.vercel.app'}/api/hcs/test-message`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -71,7 +71,7 @@ export default function HCSShowcase() {
         await loadHCSMessages()
       } else {
         // Fallback: try oracle health check
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001'}/api/oracles/health-check`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://negravis-app.vercel.app'}/api/oracles/health-check`, {
           method: 'POST'
         })
         

@@ -19,7 +19,7 @@ info:
     - **Explorer**: https://hashscan.io/testnet
     
     ## 🌐 Live Server
-    Backend server running on: `http://localhost:4001`
+    Backend server running on: `https://negravis-app.vercel.app`
     
   version: 2.0.0
   contact:
@@ -27,7 +27,7 @@ info:
     url: https://github.com/oguzhaangumuss
     
 servers:
-  - url: http://localhost:4001
+  - url: https://negravis-app.vercel.app
     description: Local Development Server (Active)
   - url: https://negravis-api.vercel.app
     description: Production Server (Coming Soon)
