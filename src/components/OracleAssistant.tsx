@@ -198,32 +198,6 @@ export default function OracleAssistant() {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const formatQueryResponse = (data: Record<string, unknown>, perspective?: string): string => {
-    // Handle conversational AI responses
-    const metadata = data.metadata as Record<string, unknown> | undefined
-    const result = data.result as Record<string, unknown> | undefined
-    
-    if (metadata?.isConversational || result?.type === 'conversational') {
-      return String((result as Record<string, unknown>)?.response) || String(data.result);
-    }
-
-    if (data.result && typeof data.result === 'object') {
-      // Handle price data with perspective
-      const resultObj = data.result as Record<string, unknown>
-      if (resultObj.symbol && resultObj.price) {
-        return formatPriceDataByPerspective(data, perspective);
-      }
-
-      // Handle weather data with perspective
-      if (resultObj.temperature !== undefined || resultObj.location) {
-        return formatWeatherDataByPerspective(data, perspective);
-      }
-    }
-    
-    // Fallback with perspective
-    return formatFallbackByPerspective(data, perspective);
-  };
 
   const formatPriceDataByPerspective = (data: Record<string, unknown>, perspective?: string): string => {
     const result = data.result as Record<string, unknown>;
@@ -391,12 +365,13 @@ export default function OracleAssistant() {
             formattedResponse += `Providers: ${meta.providersUsed || 0}\n`;
             
             // Add blockchain verification if available
-            if (response.blockchain) {
+            if (response.blockchain as Record<string, unknown>) {
               formattedResponse += `\n🔗 **Blockchain Verification:**\n`;
-              formattedResponse += `• Transaction ID: ${response.blockchain.transaction_id}\n`;
-              formattedResponse += `• Hash: ${response.blockchain.hash.slice(0, 16)}...\n`;
-              formattedResponse += `• Network: ${response.blockchain.network}\n`;
-              formattedResponse += `• Verified: ✅ ${response.blockchain.verified ? 'Yes' : 'No'}\n`;
+              const blockchain = response.blockchain as Record<string, unknown>;
+              formattedResponse += `• Transaction ID: ${blockchain.transaction_id}\n`;
+              formattedResponse += `• Hash: ${(blockchain.hash as string)?.slice(0, 16)}...\n`;
+              formattedResponse += `• Network: ${blockchain.network}\n`;
+              formattedResponse += `• Verified: ✅ ${blockchain.verified ? 'Yes' : 'No'}\n`;
             }
             
             // Add hashscan link for detailed query exploration

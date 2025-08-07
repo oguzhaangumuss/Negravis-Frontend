@@ -403,6 +403,63 @@ function HashscanPageContent() {
                           <p className="text-slate-400">No data sources available</p>
                         )}
                       </div>
+
+                      {/* Consensus Mechanism */}
+                      <div className="bg-slate-800 border border-slate-700/50 rounded-2xl p-6">
+                        <div className="flex items-center gap-3 mb-4">
+                          <Activity className="w-6 h-6 text-orange-400" />
+                          <h3 className="text-xl font-bold">Consensus Mechanism</h3>
+                        </div>
+                        
+                        <div className="space-y-4">
+                          <div className="bg-slate-700/30 rounded-lg p-4 border border-slate-600/30">
+                            <div className="flex items-center justify-between mb-3">
+                              <h4 className="font-semibold text-orange-400">Method: {(oracleResult.method as string) || 'Median'}</h4>
+                              <span className="px-2 py-1 bg-orange-500/20 text-orange-400 text-xs rounded">
+                                Aggregation
+                              </span>
+                            </div>
+                            
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 text-sm">
+                              <div>
+                                <span className="text-slate-400">Data Points:</span>
+                                <span className="ml-2 font-medium text-white">{rawResponses.length}</span>
+                              </div>
+                              <div>
+                                <span className="text-slate-400">Final Value:</span>
+                                <span className="ml-2 font-medium text-green-400">${(oracleResult.value as string) || '0'}</span>
+                              </div>
+                              <div>
+                                <span className="text-slate-400">Consensus:</span>
+                                <span className="ml-2 font-medium text-blue-400">{Math.round(((oracleResult.confidence as number || 0.95) * 100))}%</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Consensus Process Visualization */}
+                          <div className="bg-slate-700/20 rounded-lg p-4 border border-slate-600/20">
+                            <h5 className="font-medium text-slate-300 mb-3">Process Steps:</h5>
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                              <div className="text-center">
+                                <div className="w-8 h-8 bg-blue-500/20 text-blue-400 rounded-full flex items-center justify-center mx-auto mb-2 text-sm font-bold">1</div>
+                                <p className="text-xs text-slate-400">Data Collection</p>
+                              </div>
+                              <div className="text-center">
+                                <div className="w-8 h-8 bg-purple-500/20 text-purple-400 rounded-full flex items-center justify-center mx-auto mb-2 text-sm font-bold">2</div>
+                                <p className="text-xs text-slate-400">Validation</p>
+                              </div>
+                              <div className="text-center">
+                                <div className="w-8 h-8 bg-orange-500/20 text-orange-400 rounded-full flex items-center justify-center mx-auto mb-2 text-sm font-bold">3</div>
+                                <p className="text-xs text-slate-400">Aggregation</p>
+                              </div>
+                              <div className="text-center">
+                                <div className="w-8 h-8 bg-green-500/20 text-green-400 rounded-full flex items-center justify-center mx-auto mb-2 text-sm font-bold">4</div>
+                                <p className="text-xs text-slate-400">HCS Logging</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </>
                   );
                 }
