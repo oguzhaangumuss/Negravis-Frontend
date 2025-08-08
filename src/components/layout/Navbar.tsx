@@ -14,6 +14,9 @@ import {
   X,
   Circle
 } from 'lucide-react'
+import dynamic from 'next/dynamic'
+
+const WalletConnect = dynamic(() => import('../wallet/WalletConnect'), { ssr: false })
 
 interface NavItem {
   name: string
@@ -144,7 +147,7 @@ export default function Navbar() {
             })}
           </div>
 
-          {/* System Status & Mobile Menu */}
+          {/* System Status, Wallet & Mobile Menu */}
           <div className="flex items-center space-x-4">
             {/* System Status */}
             <div className="hidden md:flex items-center space-x-2">
@@ -154,6 +157,11 @@ export default function Navbar() {
               <span className="text-sm text-gray-300 whitespace-nowrap">
                 {systemStatus.isLive ? 'Live Data Stream' : 'Offline'}
               </span>
+            </div>
+
+            {/* Wallet */}
+            <div className="hidden md:block">
+              <WalletConnect variant="navbar" />
             </div>
 
             {/* Mobile menu button */}

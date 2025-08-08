@@ -131,37 +131,40 @@ export default function HCSShowcase() {
   }
 
   return (
-    <section className="py-20 bg-gradient-to-b from-black to-gray-900">
-      <div className="max-w-7xl mx-auto px-4">
-        <div className="text-center mb-16">
+    <section className="py-16 md:py-24 lg:py-32 bg-gradient-to-b from-gray-900 via-black to-gray-900">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-16 md:mb-24">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
+            className="space-y-6 md:space-y-8"
           >
-            <span className="bg-gradient-to-r from-blue-400 to-cyan-500 text-transparent bg-clip-text text-sm font-semibold tracking-wider uppercase">
-              Hedera Consensus Service Integration
-            </span>
-            <h2 className="text-4xl md:text-5xl font-bold text-white mt-4 mb-6">
+            <div className="mb-6">
+              <span className="bg-gradient-to-r from-blue-400 to-cyan-500 text-transparent bg-clip-text text-sm font-semibold tracking-wider uppercase">
+                Hedera Consensus Service Integration
+              </span>
+            </div>
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white bg-gradient-to-r from-white to-gray-300 text-transparent bg-clip-text leading-tight">
               Immutable Oracle Audit Trail
             </h2>
-            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+            <p className="text-lg md:text-xl text-gray-300 max-w-4xl mx-auto leading-relaxed">
               Every Oracle query, consensus result, and system event permanently recorded on Hedera&apos;s 
               Byzantine fault-tolerant consensus network with complete provenance tracking.
             </p>
           </motion.div>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-12 items-start">
+        <div className="grid lg:grid-cols-2 gap-12 md:gap-16 items-start">
           {/* Features */}
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8 }}
-            className="space-y-6"
+            className="space-y-8"
           >
-            <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-6">
-              <h3 className="text-2xl font-bold text-white mb-4">🏗️ Multi-Topic Architecture</h3>
+            <div className="bg-gray-800/50 border border-gray-700 rounded-2xl p-8 hover:border-blue-500/50 transition-all duration-300">
+              <h3 className="text-2xl font-bold text-white mb-6">🏗️ Multi-Topic Architecture</h3>
               <div className="space-y-3">
                 <div className="flex items-center justify-between bg-gray-900/50 p-3 rounded-lg">
                   <span className="text-gray-300">Oracle Queries Topic</span>
@@ -182,8 +185,8 @@ export default function HCSShowcase() {
               </div>
             </div>
 
-            <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-6">
-              <h3 className="text-2xl font-bold text-white mb-4">⚡ Advanced Features</h3>
+            <div className="bg-gray-800/50 border border-gray-700 rounded-2xl p-8 hover:border-green-500/50 transition-all duration-300">
+              <h3 className="text-2xl font-bold text-white mb-6">⚡ Advanced Features</h3>
               <ul className="space-y-3 text-gray-300">
                 <li className="flex items-center">
                   <div className="w-2 h-2 bg-blue-500 rounded-full mr-3"></div>
@@ -204,9 +207,9 @@ export default function HCSShowcase() {
               </ul>
             </div>
 
-            <div className="bg-gradient-to-r from-blue-900/50 to-purple-900/50 border border-blue-500/30 rounded-xl p-6">
-              <h3 className="text-xl font-bold text-white mb-2">🛡️ Byzantine Fault Tolerant</h3>
-              <p className="text-gray-300">
+            <div className="bg-gradient-to-r from-blue-900/50 to-purple-900/50 border border-blue-500/30 rounded-2xl p-8 backdrop-blur-sm">
+              <h3 className="text-2xl font-bold text-white mb-4">🛡️ Byzantine Fault Tolerant</h3>
+              <p className="text-gray-300 leading-relaxed">
                 Hedera&apos;s ABFT consensus ensures no data can be tampered with or lost, 
                 providing enterprise-grade immutable audit trails for regulatory compliance.
               </p>
@@ -218,7 +221,7 @@ export default function HCSShowcase() {
             initial={{ opacity: 0, x: 50 }}
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8 }}
-            className="bg-gray-900/80 border border-gray-700 rounded-xl p-6"
+            className="bg-gray-900/80 border border-gray-700 rounded-2xl p-8 backdrop-blur-sm"
           >
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-bold text-white">Live HCS Message Feed</h3>
@@ -280,23 +283,23 @@ export default function HCSShowcase() {
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.4 }}
-          className="mt-16 grid md:grid-cols-4 gap-6"
+          className="mt-20 md:mt-24 grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8"
         >
-          <div className="text-center bg-gray-800/50 border border-gray-700 rounded-xl p-6">
-            <div className="text-3xl font-bold text-blue-400 mb-2">15,247</div>
-            <div className="text-gray-300">Messages Logged</div>
+          <div className="text-center bg-gray-800/50 border border-gray-700 rounded-2xl p-6 md:p-8 hover:border-blue-500/50 transition-all duration-300 group">
+            <div className="text-3xl md:text-4xl font-bold text-blue-400 mb-2 group-hover:scale-110 transition-transform">15,247</div>
+            <div className="text-gray-300 text-sm md:text-base">Messages Logged</div>
           </div>
-          <div className="text-center bg-gray-800/50 border border-gray-700 rounded-xl p-6">
-            <div className="text-3xl font-bold text-green-400 mb-2">99.99%</div>
-            <div className="text-gray-300">Consensus Uptime</div>
+          <div className="text-center bg-gray-800/50 border border-gray-700 rounded-2xl p-6 md:p-8 hover:border-green-500/50 transition-all duration-300 group">
+            <div className="text-3xl md:text-4xl font-bold text-green-400 mb-2 group-hover:scale-110 transition-transform">99.99%</div>
+            <div className="text-gray-300 text-sm md:text-base">Consensus Uptime</div>
           </div>
-          <div className="text-center bg-gray-800/50 border border-gray-700 rounded-xl p-6">
-            <div className="text-3xl font-bold text-purple-400 mb-2">&lt;3s</div>
-            <div className="text-gray-300">Finality Time</div>
+          <div className="text-center bg-gray-800/50 border border-gray-700 rounded-2xl p-6 md:p-8 hover:border-purple-500/50 transition-all duration-300 group">
+            <div className="text-3xl md:text-4xl font-bold text-purple-400 mb-2 group-hover:scale-110 transition-transform">&lt;3s</div>
+            <div className="text-gray-300 text-sm md:text-base">Finality Time</div>
           </div>
-          <div className="text-center bg-gray-800/50 border border-gray-700 rounded-xl p-6">
-            <div className="text-3xl font-bold text-orange-400 mb-2">$0.0001</div>
-            <div className="text-gray-300">Cost per Message</div>
+          <div className="text-center bg-gray-800/50 border border-gray-700 rounded-2xl p-6 md:p-8 hover:border-orange-500/50 transition-all duration-300 group">
+            <div className="text-3xl md:text-4xl font-bold text-orange-400 mb-2 group-hover:scale-110 transition-transform">$0.0001</div>
+            <div className="text-gray-300 text-sm md:text-base">Cost per Message</div>
           </div>
         </motion.div>
       </div>
