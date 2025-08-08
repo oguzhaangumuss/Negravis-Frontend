@@ -31,6 +31,15 @@ interface QueryResult {
   sequence_number: number
   execution_time: number
   success: boolean
+  // Enhanced Oracle details
+  ai_response?: string
+  model?: string
+  cost?: number
+  full_oracle_data?: any
+  consensus_method?: string
+  confidence?: number
+  sources?: string[]
+  raw_result?: any
 }
 
 interface ResultsStats {
@@ -82,6 +91,14 @@ export default function ResultsPanel() {
         const avgExecutionTime = blockchainResults.length > 0 ? 
           blockchainResults.reduce((sum, r) => sum + r.execution_time, 0) / blockchainResults.length : 0
         
+        // Calculate average confidence from Oracle data
+        const confidenceValues = blockchainResults
+          .filter(r => r.confidence && r.confidence > 0)
+          .map(r => r.confidence!)
+        const avgConfidence = confidenceValues.length > 0 
+          ? confidenceValues.reduce((sum, c) => sum + c, 0) / confidenceValues.length 
+          : 95
+        
         // Find most used provider
         const providerCounts = blockchainResults.reduce((acc: Record<string, number>, r) => {
           acc[r.provider] = (acc[r.provider] || 0) + 1
@@ -97,7 +114,7 @@ export default function ResultsPanel() {
           successful_queries: successful.length,
           failed_queries: failed.length,
           average_execution_time: Math.round(avgExecutionTime),
-          average_confidence: 95, // High confidence for blockchain-verified data
+          average_confidence: Math.round(avgConfidence),
           most_used_provider: mostUsedProvider,
           blockchain_verification_rate: Math.round(verificationRate)
         })
@@ -369,11 +386,50 @@ export default function ResultsPanel() {
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-3 text-sm">
+                      {/* Oracle Metrics */}
+                      <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-4 text-sm">
                         <div>
                           <span className="text-gray-400">Execution Time</span>
                           <p className="text-white font-medium">{result.execution_time}ms</p>
                         </div>
+                        <div>
+                          <span className="text-gray-400">Oracle Model</span>
+                          <p className="text-white font-medium">{result.model || result.provider}</p>
+                        </div>
+                        <div>
+                          <span className="text-gray-400">Consensus</span>
+                          <p className="text-white font-medium">{result.consensus_method || 'median'}</p>
+                        </div>
+                        <div>
+                          <span className="text-gray-400">Confidence</span>
+                          <p className="text-white font-medium">{result.confidence ? `${result.confidence.toFixed(1)}%` : 'N/A'}</p>
+                        </div>
+                        <div>
+                          <span className="text-gray-400">Sources</span>
+                          <p className="text-white font-medium">{result.sources?.length || 1}</p>
+                        </div>
+                        <div>
+                          <span className="text-gray-400">Cost</span>
+                          <p className="text-white font-medium">{result.cost || 0} hbar</p>
+                        </div>
+                      </div>
+
+                      {/* Oracle Sources */}
+                      {result.sources && result.sources.length > 0 && (
+                        <div className="mb-4">
+                          <h4 className="text-white text-sm font-medium mb-2">Data Sources</h4>
+                          <div className="flex flex-wrap gap-2">
+                            {result.sources.map((source, index) => (
+                              <span key={index} className="bg-blue-900/30 border border-blue-800 text-blue-300 px-2 py-1 rounded text-xs">
+                                {source}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Blockchain Details */}
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4 text-sm">
                         <div>
                           <span className="text-gray-400">Sequence Number</span>
                           <p className="text-white font-medium">#{result.sequence_number}</p>
@@ -383,18 +439,41 @@ export default function ResultsPanel() {
                           <p className="text-white font-medium text-xs">{result.blockchain_hash.slice(0, 20)}...</p>
                         </div>
                         <div>
-                          <span className="text-gray-400">Status</span>
-                          <p className="text-white font-medium">HCS Verified</p>
+                          <span className="text-gray-400">HCS Status</span>
+                          <p className="text-green-400 font-medium">✓ Verified</p>
                         </div>
                       </div>
 
+                      {/* Oracle Result */}
                       {result.success && result.result && (
-                        <div className="bg-gray-800/50 rounded-lg p-3 mb-3">
-                          <h4 className="text-white text-sm font-medium mb-1">Oracle Result</h4>
-                          <p className="text-green-400 text-lg font-bold">{result.result}</p>
+                        <div className="bg-gray-800/50 rounded-lg p-4 mb-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <h4 className="text-white text-sm font-medium">Oracle Result</h4>
+                            {result.confidence && result.confidence > 0 && (
+                              <span className="text-green-400 text-xs">
+                                {result.confidence.toFixed(2)}% confidence
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-green-400 text-xl font-bold mb-2">{result.result}</p>
+                          
+                          {/* Raw Oracle Data */}
+                          {result.full_oracle_data && Object.keys(result.full_oracle_data).length > 0 && (
+                            <details className="mt-3">
+                              <summary className="text-gray-400 text-xs cursor-pointer hover:text-gray-300">
+                                View Raw Oracle Data
+                              </summary>
+                              <div className="mt-2 bg-gray-900/50 rounded p-2 text-xs">
+                                <pre className="text-gray-300 whitespace-pre-wrap overflow-x-auto">
+                                  {JSON.stringify(result.full_oracle_data, null, 2)}
+                                </pre>
+                              </div>
+                            </details>
+                          )}
                         </div>
                       )}
 
+                      {/* Failed Query */}
                       {!result.success && (
                         <div className="bg-red-900/20 border border-red-800 rounded-lg p-3 mb-3">
                           <h4 className="text-red-400 text-sm font-medium mb-1">Query Failed</h4>
