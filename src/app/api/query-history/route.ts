@@ -117,19 +117,31 @@ const detectProvider = (messageData: any, topicId: string): string => {
   if (messageData.oracle_used) return messageData.oracle_used
   if (messageData.provider) return messageData.provider
   
-  // Detect based on topic ID patterns
-  if (topicId === '0.0.6533614') return 'weather'
+  // PRIORITY 1: Content-based detection (more accurate than topic-based)
+  // Check sources first - most reliable
+  if (messageData.result?.sources) {
+    if (messageData.result.sources.includes('coingecko')) return 'coingecko'
+    if (messageData.result.sources.includes('dia')) return 'dia'  
+    if (messageData.result.sources.includes('chainlink')) return 'chainlink'
+    if (messageData.result.sources.includes('weather')) return 'weather'
+    // Return first source if available
+    if (messageData.result.sources.length > 0) return messageData.result.sources[0]
+  }
+  
+  // PRIORITY 2: Message content patterns
+  if (messageData.raw_data?.temperature || messageData.result?.value?.temperature) return 'weather'
+  if (messageData.result?.value && typeof messageData.result.value === 'number' && messageData.query?.includes('price')) {
+    // If it's a price query but no source specified, try to infer
+    if (topicId === '0.0.6533616') return 'dia'
+    return 'coingecko' // Default for price queries
+  }
+  if (messageData.price || messageData.result?.price) return 'coingecko'
+  if (messageData.answer?.includes('🌤️')) return 'weather'
+  
+  // PRIORITY 3: Topic-based detection (fallback only)
   if (topicId === '0.0.6533616') return 'dia'
   if (topicId === '0.0.6503587') return 'queries'  
   if (topicId === '0.0.6503588') return 'operations'
-  
-  // Detect based on message content
-  if (messageData.raw_data?.temperature) return 'weather'
-  if (messageData.result?.sources?.includes('dia')) return 'dia'
-  if (messageData.result?.value && typeof messageData.result.value === 'number') return 'dia'
-  if (messageData.price || messageData.result?.price) return 'coingecko'
-  if (messageData.answer?.includes('🌤️')) return 'weather'
-  if (messageData.answer?.includes('$')) return 'financial'
   
   return 'unknown'
 }
