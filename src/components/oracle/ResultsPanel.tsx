@@ -7,13 +7,9 @@ import {
   Clock,
   CheckCircle,
   XCircle,
-  Filter,
   Download,
   ExternalLink,
-  Eye,
-  Calendar,
   Database,
-  BarChart3,
   Activity,
   AlertCircle,
   RefreshCw
@@ -57,9 +53,7 @@ export default function ResultsPanel() {
   const [stats, setStats] = useState<ResultsStats | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [filter, setFilter] = useState<'all' | 'completed' | 'failed'>('all')
   const [searchQuery, setSearchQuery] = useState('')
-  const [selectedTimeRange, setSelectedTimeRange] = useState<'1h' | '24h' | '7d' | '30d'>('24h')
 
   useEffect(() => {
     const loadResultsData = async () => {
@@ -67,9 +61,9 @@ export default function ResultsPanel() {
         setIsLoading(true)
         setError(null)
         
-        // Fetch real blockchain query history 
+        // Fetch real blockchain query history with cache busting
         const [historyResponse] = await Promise.allSettled([
-          fetch(`/api/query-history?limit=50&offset=0`)
+          fetch(`/api/query-history?limit=50&offset=0&t=${Date.now()}`)
         ])
         
         let blockchainResults: QueryResult[] = []
@@ -129,18 +123,16 @@ export default function ResultsPanel() {
 
     loadResultsData()
     
-    // Refresh every 30 seconds
-    const interval = setInterval(loadResultsData, 30000)
+    // Refresh every 10 seconds
+    const interval = setInterval(loadResultsData, 10000)
     return () => clearInterval(interval)
-  }, [selectedTimeRange])
+  }, [])
 
   const filteredResults = results.filter(result => {
-    const status = result.success ? 'completed' : 'failed'
-    const matchesFilter = filter === 'all' || status === filter
     const matchesSearch = searchQuery === '' || 
       result.query.toLowerCase().includes(searchQuery.toLowerCase()) ||
       result.provider.toLowerCase().includes(searchQuery.toLowerCase())
-    return matchesFilter && matchesSearch
+    return matchesSearch
   })
 
   const formatTimestamp = (timestamp: string) => {
@@ -252,93 +244,8 @@ export default function ResultsPanel() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Filters & Controls */}
-          <div className="space-y-6">
-            {/* Time Range Filter */}
-            <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-6 backdrop-blur-sm">
-              <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                <Calendar className="w-5 h-5" />
-                Time Range
-              </h3>
-              
-              <div className="space-y-2">
-                {[
-                  { value: '1h', label: 'Last Hour' },
-                  { value: '24h', label: 'Last 24 Hours' },
-                  { value: '7d', label: 'Last 7 Days' },
-                  { value: '30d', label: 'Last 30 Days' }
-                ].map(option => (
-                  <button
-                    key={option.value}
-                    onClick={() => setSelectedTimeRange(option.value as any)}
-                    className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
-                      selectedTimeRange === option.value
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-800/50 text-gray-300 hover:bg-gray-800'
-                    }`}
-                  >
-                    {option.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Status Filter */}
-            <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-6 backdrop-blur-sm">
-              <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                <Filter className="w-5 h-5" />
-                Status Filter
-              </h3>
-              
-              <div className="space-y-2">
-                {[
-                  { value: 'all', label: 'All Results', count: results.length },
-                  { value: 'completed', label: 'Completed', count: results.filter(r => r.success).length },
-                  { value: 'failed', label: 'Failed', count: results.filter(r => !r.success).length }
-                ].map(option => (
-                  <button
-                    key={option.value}
-                    onClick={() => setFilter(option.value as any)}
-                    className={`w-full text-left px-3 py-2 rounded-lg transition-colors flex items-center justify-between ${
-                      filter === option.value
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-800/50 text-gray-300 hover:bg-gray-800'
-                    }`}
-                  >
-                    <span>{option.label}</span>
-                    <span className="text-sm opacity-75">{option.count}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Quick Stats */}
-            <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-6 backdrop-blur-sm">
-              <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                <BarChart3 className="w-5 h-5" />
-                Quick Stats
-              </h3>
-              
-              <div className="space-y-3 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Most Used Provider</span>
-                  <span className="text-white font-medium">{stats?.most_used_provider}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Blockchain Verification</span>
-                  <span className="text-green-400 font-medium">{stats?.blockchain_verification_rate}%</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Failed Queries</span>
-                  <span className="text-red-400 font-medium">{stats?.failed_queries}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Results List */}
-          <div className="lg:col-span-3">
+        {/* Results List - Full Width */}
+        <div className="w-full">
             <div className="bg-gray-900/50 border border-gray-800 rounded-xl backdrop-blur-sm">
               {/* Search Header */}
               <div className="p-6 border-b border-gray-800">
@@ -501,13 +408,12 @@ export default function ResultsPanel() {
                     <Database className="w-16 h-16 text-gray-600 mx-auto mb-4" />
                     <h3 className="text-xl font-semibold text-white mb-2">No Results Found</h3>
                     <p className="text-gray-400">
-                      {searchQuery ? 'Try adjusting your search query or filters.' : 'No query results available for the selected time range.'}
+                      {searchQuery ? 'Try adjusting your search query.' : 'No query results available.'}
                     </p>
                   </div>
                 )}
               </div>
             </div>
-          </div>
         </div>
       </div>
     </div>

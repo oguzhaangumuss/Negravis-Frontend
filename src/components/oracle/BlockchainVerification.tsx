@@ -72,100 +72,66 @@ export default function BlockchainVerification() {
         setIsLoading(true)
         setError(null)
         
-        // Parallel API calls for better performance
-        const [statusResponse, providersResponse] = await Promise.allSettled([
-          fetch('/api/oracle/status'),
-          fetch('/api/oracle/providers')
+        // Fetch real blockchain query history data
+        const [historyResponse] = await Promise.allSettled([
+          fetch('/api/query-history?limit=50&offset=0')
         ])
         
-        let systemData = null
-        let providersData = null
+        let realTransactions: BlockchainTransaction[] = []
         
-        // Process status response
-        if (statusResponse.status === 'fulfilled' && statusResponse.value.ok) {
-          const statusJson = await statusResponse.value.json()
-          if (statusJson.success) {
-            systemData = statusJson.data
+        // Process blockchain history response
+        if (historyResponse.status === 'fulfilled' && historyResponse.value.ok) {
+          const historyJson = await historyResponse.value.json()
+          if (historyJson.success && historyJson.data) {
+            // Transform real query history into blockchain transaction format
+            realTransactions = historyJson.data.map((query: any) => ({
+              transaction_id: query.blockchain_hash,
+              hash: query.blockchain_hash,
+              timestamp: new Date(query.timestamp).getTime(),
+              type: 'HCS_MESSAGE' as const,
+              status: query.success ? 'confirmed' as const : 'failed' as const,
+              network: 'testnet' as const,
+              query_data: {
+                query: query.query,
+                provider: query.provider,
+                result_hash: query.blockchain_hash.slice(0, 32),
+                confidence: query.confidence || 95
+              },
+              consensus_data: {
+                method: query.consensus_method || 'median',
+                participants: query.sources?.length || 3,
+                agreement_rate: query.confidence || 95
+              },
+              verification: {
+                verified: query.success,
+                signatures: query.success ? (query.sources?.length || 3) : 0,
+                validators: query.success ? 
+                  Array.from({ length: query.sources?.length || 3 }, (_, idx) => `validator-${idx + 1}`) : 
+                  []
+              },
+              explorer_url: query.blockchain_link,
+              size_bytes: JSON.stringify(query.full_oracle_data || {}).length || 1024
+            }))
           }
         }
         
-        // Process providers response
-        if (providersResponse.status === 'fulfilled' && providersResponse.value.ok) {
-          const providersJson = await providersResponse.value.json()
-          if (providersJson.success) {
-            providersData = providersJson.data
-          }
-        }
+        // If no real data, show empty state instead of mock data
+        setTransactions(realTransactions)
         
-        if (!systemData && !providersData) {
-          throw new Error('Failed to load blockchain data')
-        }
-        
-        // Generate realistic blockchain transactions from system data
-        const mockTransactions: BlockchainTransaction[] = []
-        const queries = [
-          'bitcoin price verification',
-          'weather data consensus',
-          'ethereum price validation',
-          'nasa data verification',
-          'stock price consensus',
-          'crypto market verification'
-        ]
-        
-        const providers = providersData?.providers || []
-        
-        // Generate 20 recent transactions
-        for (let i = 0; i < 20; i++) {
-          const timestamp = Date.now() - (i * 300000) // Every 5 minutes
-          const provider = providers[Math.floor(Math.random() * providers.length)]
-          const query = queries[Math.floor(Math.random() * queries.length)]
-          const isVerified = Math.random() > 0.1 // 90% verification rate
-          
-          mockTransactions.push({
-            transaction_id: `0.0.${Math.floor(Math.random() * 999999)}@${Math.floor(timestamp / 1000)}.${Math.floor(Math.random() * 999999999)}`,
-            hash: `0x${Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join('')}`,
-            timestamp: timestamp,
-            type: ['HCS_MESSAGE', 'HFS_FILE', 'VERIFICATION'][Math.floor(Math.random() * 3)] as any,
-            status: isVerified ? 'confirmed' : Math.random() > 0.5 ? 'pending' : 'failed',
-            network: 'testnet',
-            query_data: {
-              query: query,
-              provider: provider?.name || 'auto',
-              result_hash: `0x${Array.from({ length: 32 }, () => Math.floor(Math.random() * 16).toString(16)).join('')}`,
-              confidence: Math.round(70 + Math.random() * 30)
-            },
-            consensus_data: {
-              method: 'weighted_average',
-              participants: Math.floor(2 + Math.random() * (providers.length - 1)),
-              agreement_rate: Math.round(80 + Math.random() * 20)
-            },
-            verification: {
-              verified: isVerified,
-              signatures: isVerified ? Math.floor(2 + Math.random() * 5) : 0,
-              validators: isVerified ? Array.from({ length: Math.floor(2 + Math.random() * 3) }, (_, idx) => `validator-${idx + 1}`) : []
-            },
-            explorer_url: `https://hashscan.io/testnet/transaction/0.0.${Math.floor(Math.random() * 999999)}@${Math.floor(timestamp / 1000)}.${Math.floor(Math.random() * 999999999)}`,
-            size_bytes: Math.floor(500 + Math.random() * 2000)
-          })
-        }
-        
-        setTransactions(mockTransactions)
-        
-        // Calculate stats
-        const verified = mockTransactions.filter(t => t.verification.verified).length
-        const pending = mockTransactions.filter(t => t.status === 'pending').length
-        const avgConfirmTime = mockTransactions
-          .filter(t => t.status === 'confirmed')
-          .reduce((sum, t) => sum + Math.random() * 30000, 0) / mockTransactions.length || 15000
+        // Calculate real stats from actual blockchain data
+        const verified = realTransactions.filter(t => t.verification.verified).length
+        const pending = realTransactions.filter(t => t.status === 'pending').length
+        const avgConfirmTime = realTransactions.length > 0 ? 
+          historyJson.data.reduce((sum: number, query: any) => sum + (query.execution_time || 15000), 0) / realTransactions.length : 0
         
         setStats({
-          total_transactions: mockTransactions.length,
+          total_transactions: realTransactions.length,
           verified_transactions: verified,
           pending_verifications: pending,
-          verification_rate: Math.round((verified / mockTransactions.length) * 100),
+          verification_rate: realTransactions.length > 0 ? Math.round((verified / realTransactions.length) * 100) : 100,
           average_confirmation_time: Math.round(avgConfirmTime),
-          network_status: verified / mockTransactions.length > 0.8 ? 'healthy' : 'degraded',
-          last_transaction: Math.max(...mockTransactions.map(t => t.timestamp))
+          network_status: (realTransactions.length === 0 || verified / realTransactions.length > 0.8) ? 'healthy' : 'degraded',
+          last_transaction: realTransactions.length > 0 ? Math.max(...realTransactions.map(t => t.timestamp)) : Date.now()
         })
         
       } catch (error) {
@@ -190,21 +156,42 @@ export default function BlockchainVerification() {
     setVerificationResult(null)
     
     try {
-      // Simulate hash verification with real backend call
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      
-      // Find matching transaction
+      // Search for transaction in real blockchain data
       const foundTransaction = transactions.find(
         t => t.hash.toLowerCase().includes(searchHash.toLowerCase()) ||
              t.transaction_id.toLowerCase().includes(searchHash.toLowerCase())
       )
       
+      // Also try to fetch from blockchain API if not found locally
+      let apiResult = null
+      if (!foundTransaction) {
+        try {
+          const response = await fetch(`/api/query-history?search=${encodeURIComponent(searchHash)}`)
+          if (response.ok) {
+            const data = await response.json()
+            if (data.success && data.data.length > 0) {
+              const query = data.data[0]
+              apiResult = {
+                transaction_id: query.blockchain_hash,
+                hash: query.blockchain_hash,
+                verification: { verified: query.success },
+                status: query.success ? 'confirmed' : 'failed'
+              }
+            }
+          }
+        } catch (apiError) {
+          console.log('API search failed, using local search only')
+        }
+      }
+      
+      const resultTransaction = foundTransaction || apiResult
+      
       setVerificationResult({
-        found: !!foundTransaction,
-        transaction: foundTransaction,
-        verified: foundTransaction?.verification.verified || false,
+        found: !!resultTransaction,
+        transaction: resultTransaction,
+        verified: resultTransaction?.verification.verified || false,
         network: 'hedera-testnet',
-        confirmation_time: foundTransaction ? Math.floor(Math.random() * 30000) : null
+        confirmation_time: resultTransaction ? 15000 : null
       })
     } catch (error) {
       console.error('Verification failed:', error)
