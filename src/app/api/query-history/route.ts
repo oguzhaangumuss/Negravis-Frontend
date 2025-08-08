@@ -73,11 +73,13 @@ const KNOWN_ORACLE_TOPICS = {
   latest_oracle: "0.0.6496308",  // Latest Oracle queries (current session)
 }
 
-// Function to get backend Oracle topics dynamically
+// Function to get backend Oracle topics dynamically from database
 const getBackendTopics = async (): Promise<string[]> => {
   const backends = [
-    'https://negravis-app.vercel.app/api/hcs/topics', // Production backend
-    'http://localhost:4001/api/hcs/topics' // Local backend fallback
+    'https://negravis-app.vercel.app/api/hcs/topics/active', // Production backend - Database topics
+    'https://negravis-app.vercel.app/api/hcs/topics', // Production backend - Discovery fallback
+    'http://localhost:4001/api/hcs/topics/active', // Local backend - Database topics
+    'http://localhost:4001/api/hcs/topics' // Local backend - Discovery fallback
   ]
   
   for (const backendUrl of backends) {
@@ -100,8 +102,19 @@ const getBackendTopics = async (): Promise<string[]> => {
         // Extract topic IDs from backend response
         const topics: string[] = []
         
-        // New format: data.hcsService.topics (prioritize this)
-        if (data.success && data.hcsService?.topics) {
+        // PRIORITY 1: Database active topics (most reliable for new queries)
+        if (data.success && data.data?.active_topics) {
+          console.log('🎯 Processing database active topics:', data.data.active_topics)
+          data.data.active_topics.forEach((topicId: string) => {
+            if (typeof topicId === 'string' && topicId.match(/^0\.0\.\d+$/)) {
+              topics.push(topicId)
+              console.log(`✅ Found database active topic: ${topicId}`)
+            }
+          })
+        }
+        
+        // PRIORITY 2: New format: data.hcsService.topics (prioritize this)
+        if (topics.length === 0 && data.success && data.hcsService?.topics) {
           console.log('🎯 Processing hcsService.topics format:', data.hcsService.topics)
           Object.entries(data.hcsService.topics).forEach(([key, value]: [string, any]) => {
             if (typeof value === 'string' && value.match(/^0\.0\.\d+$/)) {
