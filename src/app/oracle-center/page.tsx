@@ -13,6 +13,7 @@ import {
 } from 'lucide-react'
 import ProviderDashboard from '../../components/oracle/ProviderDashboard'
 import InteractiveQueryBuilder from '../../components/oracle/InteractiveQueryBuilder'
+import ResultsPanel from '../../components/oracle/ResultsPanel'
 
 type TabType = 'overview' | 'providers' | 'query-builder' | 'consensus' | 'results' | 'blockchain'
 
@@ -301,13 +302,7 @@ function ConsensusTab() {
 }
 
 function ResultsTab() {
-  return (
-    <div className="text-center py-16">
-      <FileText className="w-16 h-16 text-green-400 mx-auto mb-4" />
-      <h3 className="text-xl font-semibold text-white mb-2">Query Results</h3>
-      <p className="text-gray-400">Query history and analysis coming soon...</p>
-    </div>
-  )
+  return <ResultsPanel />
 }
 
 function BlockchainTab() {
