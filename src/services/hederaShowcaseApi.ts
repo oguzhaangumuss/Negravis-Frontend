@@ -132,8 +132,8 @@ class HederaShowcaseApiService {
       
       // Get system status and providers for fallback
       const [statusResponse, providersResponse] = await Promise.all([
-        fetch(`${this.baseUrl}/api/oracles/status`),
-        fetch(`${this.baseUrl}/api/oracles/providers`)
+        fetch(`/api/oracle/status`),
+        fetch(`/api/oracle/providers`)
       ]);
 
       const statusData = await statusResponse.json();
@@ -188,7 +188,7 @@ class HederaShowcaseApiService {
   async getSmartContractData(): Promise<SmartContractData> {
     try {
       // Get system status for contract metrics
-      const statusResponse = await fetch(`${this.baseUrl}/api/oracles/status`);
+      const statusResponse = await fetch(`/api/oracle/status`);
       const statusData = await statusResponse.json();
 
       const contractData: SmartContractData = {
@@ -245,7 +245,7 @@ class HederaShowcaseApiService {
     try {
       // In a real implementation, this would fetch from HFS service
       // For now, we'll simulate based on system health
-      const statusResponse = await fetch(`${this.baseUrl}/api/oracles/status`);
+      const statusResponse = await fetch(`/api/oracle/status`);
       const statusData = await statusResponse.json();
 
       const totalDocs = statusData.success ? Math.round(statusData.data?.uptime * 10) || 1247 : 1247;
@@ -298,7 +298,7 @@ class HederaShowcaseApiService {
   async getHashScanTransactions(limit: number = 5): Promise<HashScanTransaction[]> {
     try {
       // Get recent oracle queries to simulate real transactions
-      const providersResponse = await fetch(`${this.baseUrl}/api/oracles/providers`);
+      const providersResponse = await fetch(`/api/oracle/providers`);
       const providersData = await providersResponse.json();
 
       const transactions: HashScanTransaction[] = [];
@@ -339,8 +339,8 @@ class HederaShowcaseApiService {
     try {
       // Get system status and providers data
       const [statusResponse, providersResponse] = await Promise.all([
-        fetch(`${this.baseUrl}/api/oracles/status`),
-        fetch(`${this.baseUrl}/api/oracles/providers`)
+        fetch(`/api/oracle/status`),
+        fetch(`/api/oracle/providers`)
       ]);
 
       const statusData = await statusResponse.json();
@@ -389,8 +389,8 @@ class HederaShowcaseApiService {
   async getHederaAnalytics(): Promise<HederaAnalyticsData> {
     try {
       const [statusResponse, providersResponse] = await Promise.all([
-        fetch(`${this.baseUrl}/api/oracles/status`),
-        fetch(`${this.baseUrl}/api/oracles/providers`)
+        fetch(`/api/oracle/status`),
+        fetch(`/api/oracle/providers`)
       ]);
 
       const statusData = await statusResponse.json();

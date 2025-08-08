@@ -144,27 +144,6 @@ export default function Component() {
     <div className={`w-full bg-black text-white ${merriweather.className}`}>
       {/* Hero Section */}
       <div className="relative w-full h-screen overflow-hidden">
-        <header className="absolute top-0 left-0 right-0 z-10 p-4">
-          <nav className="flex justify-between items-center max-w-6xl mx-auto">
-            <div className="flex items-center">
-              <div className="w-20 h-20">
-                <Canvas camera={{ position: [0, 0, 5] }}>
-                  <ambientLight intensity={0.5} />
-                  <pointLight position={[10, 10, 10]} />
-                  <SpinningLogo />
-                </Canvas>
-              </div>
-              <span className="text-2xl font-bold">Negravis</span>
-            </div>
-            <ul className="flex space-x-6">
-              <li><a href="/" className="hover:text-gray-300 cursor-pointer">Home</a></li>
-              <li><a href="/api-docs" className="hover:text-gray-300 cursor-pointer">API Docs</a></li>
-              <li><a href="/hashscan" className="hover:text-gray-300 cursor-pointer">Analytics</a></li>
-              <li><a href="/dapp" className="hover:text-gray-300 cursor-pointer">Oracle</a></li>
-              <li><a href="https://github.com/Drehalas/Negravis" target="_blank" rel="noopener noreferrer" className="hover:text-gray-300 cursor-pointer">GitHub</a></li>
-            </ul>
-          </nav>
-        </header>
         <div className="absolute top-1/3 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center z-10">
           <div className="mb-4">
             <span className="bg-gradient-to-r from-blue-400 to-purple-500 text-transparent bg-clip-text text-sm font-semibold tracking-wider uppercase">
@@ -196,7 +175,7 @@ export default function Component() {
             </div>
           </div>
           <div className="flex gap-4 items-center justify-center">
-            <a href="/dapp" className="bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold py-3 px-8 rounded-md hover:from-blue-700 hover:to-purple-700 transition duration-300 inline-block shadow-lg">
+            <a href="/oracle-center" className="bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold py-3 px-8 rounded-md hover:from-blue-700 hover:to-purple-700 transition duration-300 inline-block shadow-lg">
               Launch Oracle Assistant
             </a>
             <a href="/api-docs" className="border border-white/30 text-white font-semibold py-3 px-6 rounded-md hover:bg-white/10 transition duration-300 inline-block">

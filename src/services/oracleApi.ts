@@ -3,7 +3,7 @@
  * Frontend service for interacting with backend Oracle APIs
  */
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://negravis-app.vercel.app';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
 export interface OracleQueryResponse {
   success: boolean;
@@ -219,7 +219,7 @@ class OracleApiService {
       console.log(`🔍 Oracle query: ${provider} - "${query}"`);
       
       // Use the new enhanced Oracle Manager endpoint
-      const response = await fetch(`${this.baseUrl}/api/oracle-manager/query`, {
+      const response = await fetch(`/api/oracle-manager/query`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -306,7 +306,7 @@ class OracleApiService {
         params.append('timeout', options.timeout.toString());
       }
 
-      const response = await fetch(`${this.baseUrl}/api/oracles/query?${params}`);
+      const response = await fetch(`/api/oracle/query?${params}`);
       return await response.json();
     } catch (error: unknown) {
       console.error('Oracle query error:', error);
@@ -333,7 +333,7 @@ class OracleApiService {
       }
 
       const queryString = params.toString() ? `?${params}` : '';
-      const response = await fetch(`${this.baseUrl}/api/oracles/price/${symbol}${queryString}`);
+      const response = await fetch(`/api/oracle/price/${symbol}${queryString}`);
       return await response.json();
     } catch (error: unknown) {
       console.error('Price query error:', error);
@@ -350,7 +350,7 @@ class OracleApiService {
    */
   async getWeather(location: string): Promise<WeatherResponse> {
     try {
-      const response = await fetch(`${this.baseUrl}/api/oracles/weather/${encodeURIComponent(location)}`);
+      const response = await fetch(`/api/oracle/weather/${encodeURIComponent(location)}`);
       return await response.json();
     } catch (error: unknown) {
       console.error('Weather query error:', error);
@@ -367,7 +367,7 @@ class OracleApiService {
    */
   async getProviders(): Promise<ProvidersResponse> {
     try {
-      const response = await fetch(`${this.baseUrl}/api/oracles/providers`);
+      const response = await fetch(`/api/oracle/providers`);
       return await response.json();
     } catch (error: unknown) {
       console.error('Providers query error:', error);
@@ -384,7 +384,7 @@ class OracleApiService {
    */
   async getSystemStatus(): Promise<SystemStatusResponse> {
     try {
-      const response = await fetch(`${this.baseUrl}/api/oracles/status`);
+      const response = await fetch(`/api/oracle/status`);
       return await response.json();
     } catch (error: unknown) {
       console.error('System status query error:', error);
@@ -401,7 +401,7 @@ class OracleApiService {
    */
   async healthCheck(): Promise<{ success: boolean; data?: Record<string, unknown>; error?: string }> {
     try {
-      const response = await fetch(`${this.baseUrl}/api/oracles/health-check`, {
+      const response = await fetch(`/api/oracle/health-check`, {
         method: 'POST'
       });
       return await response.json();
@@ -424,7 +424,7 @@ class OracleApiService {
     timeout?: number;
   }>): Promise<{ success: boolean; data?: Record<string, unknown>; error?: string }> {
     try {
-      const response = await fetch(`${this.baseUrl}/api/oracles/batch`, {
+      const response = await fetch(`/api/oracle/batch`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -447,7 +447,7 @@ class OracleApiService {
   async getHashscanQuery(queryId: string): Promise<HashscanQueryResponse> {
     try {
       console.log(`🔍 Fetching hashscan query: ${queryId}`);
-      const response = await fetch(`${this.baseUrl}/api/hashscan/query/${encodeURIComponent(queryId)}`);
+      const response = await fetch(`/api/hashscan/query/${encodeURIComponent(queryId)}`);
       
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);

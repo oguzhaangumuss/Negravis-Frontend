@@ -71,7 +71,7 @@ export default function HCSShowcase() {
         await loadHCSMessages()
       } else {
         // Fallback: try oracle health check
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://negravis-app.vercel.app'}/api/oracles/health-check`, {
+        const response = await fetch(`/api/oracle/health-check`, {
           method: 'POST'
         })
         
