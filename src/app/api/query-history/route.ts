@@ -76,7 +76,7 @@ const KNOWN_ORACLE_TOPICS = {
 // Function to get backend Oracle topics dynamically
 const getBackendTopics = async (): Promise<string[]> => {
   const backends = [
-    'https://negravis-backend.vercel.app/api/hcs/topics', // Production backend
+    'https://negravis-app.vercel.app/api/hcs/topics', // Production backend
     'http://localhost:4001/api/hcs/topics' // Local backend fallback
   ]
   
