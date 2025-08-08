@@ -63,6 +63,18 @@ const SAMPLE_QUERIES = [
   { label: 'Tech News', query: 'latest tech news', provider: 'newsapi' }
 ]
 
+// Provider name mapping: Display Name -> Internal Name
+const PROVIDER_MAPPING: Record<string, string> = {
+  'Chainlink': 'chainlink',
+  'CoinGecko': 'coingecko', 
+  'DIA Oracle': 'dia',
+  'Weather Oracle': 'weather',
+  'Exchange Rate': 'exchangerate',
+  'Sports Oracle': 'sports',
+  'NASA': 'nasa',
+  'Wikipedia': 'wikipedia'
+}
+
 export default function InteractiveQueryBuilder() {
   const [query, setQuery] = useState('')
   const [selectedProvider, setSelectedProvider] = useState('')
@@ -115,7 +127,7 @@ export default function InteractiveQueryBuilder() {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          provider: selectedProvider === 'auto' ? 'auto' : selectedProvider,
+          provider: PROVIDER_MAPPING[selectedProvider] || selectedProvider,
           query: query.trim(),
           userId: 'frontend-user'
         })
