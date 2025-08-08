@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { 
   TrendingUp,
   Search,
@@ -55,8 +55,7 @@ export default function ResultsPanel() {
   const [error, setError] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
 
-  useEffect(() => {
-    const loadResultsData = async () => {
+  const loadResultsData = useCallback(async () => {
       try {
         setIsLoading(true)
         setError(null)
@@ -119,14 +118,15 @@ export default function ResultsPanel() {
       } finally {
         setIsLoading(false)
       }
-    }
+    }, [])
 
+  useEffect(() => {
     loadResultsData()
     
-    // Refresh every 10 seconds
-    const interval = setInterval(loadResultsData, 10000)
-    return () => clearInterval(interval)
-  }, [])
+    // Auto refresh removed - manual refresh only via Refresh button
+    // const interval = setInterval(loadResultsData, 10000)
+    // return () => clearInterval(interval)
+  }, [loadResultsData])
 
   const filteredResults = results.filter(result => {
     const matchesSearch = searchQuery === '' || 
@@ -189,8 +189,9 @@ export default function ResultsPanel() {
           </div>
           
           <button 
-            onClick={() => window.location.reload()}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+            onClick={loadResultsData}
+            disabled={isLoading}
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg transition-colors"
           >
             <RefreshCw className="w-4 h-4" />
             Refresh
