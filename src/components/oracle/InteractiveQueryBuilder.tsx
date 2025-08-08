@@ -65,7 +65,7 @@ const SAMPLE_QUERIES = [
 
 export default function InteractiveQueryBuilder() {
   const [query, setQuery] = useState('')
-  const [selectedProvider, setSelectedProvider] = useState('coingecko')
+  const [selectedProvider, setSelectedProvider] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [result, setResult] = useState<QueryResult | null>(null)
   const [providers, setProviders] = useState<Provider[]>([])
@@ -169,17 +169,30 @@ export default function InteractiveQueryBuilder() {
               </h2>
               
               <form onSubmit={handleSubmit} className="space-y-4">
+                {/* Step Instructions */}
+                {!selectedProvider && (
+                  <div className="bg-blue-900/20 border border-blue-800 rounded-lg p-4 mb-4">
+                    <div className="flex items-center gap-2 text-blue-400 mb-2">
+                      <AlertCircle className="w-4 h-4" />
+                      <span className="font-medium">Getting Started</span>
+                    </div>
+                    <p className="text-blue-300 text-sm">
+                      First select an Oracle Assistant from the dropdown below, then enter your query.
+                    </p>
+                  </div>
+                )}
+                
                 {/* Provider Selection */}
                 <div>
                   <label className="block text-gray-300 text-sm font-medium mb-2">
-                    Oracle Provider
+                    Oracle Assistant
                   </label>
                   <select 
                     value={selectedProvider}
                     onChange={(e) => setSelectedProvider(e.target.value)}
                     className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
-                    <option value="coingecko">🦎 CoinGecko - Crypto Prices (Recommended)</option>
+                    <option value="">Select Oracle Assistant...</option>
                     {providersLoading ? (
                       <option disabled>Loading providers...</option>
                     ) : (
@@ -209,7 +222,7 @@ export default function InteractiveQueryBuilder() {
                 {/* Submit Button */}
                 <button
                   type="submit"
-                  disabled={isLoading || !query.trim()}
+                  disabled={isLoading || !query.trim() || !selectedProvider}
                   className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 disabled:from-gray-700 disabled:to-gray-700 text-white font-medium py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2"
                 >
                   {isLoading ? (
