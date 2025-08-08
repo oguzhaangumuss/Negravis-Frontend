@@ -86,8 +86,11 @@ const getBackendTopics = async (): Promise<string[]> => {
       
       const response = await fetch(backendUrl, {
         method: 'GET',
-        headers: { 'Accept': 'application/json' },
-        signal: AbortSignal.timeout(5000)
+        headers: { 
+          'Accept': 'application/json',
+          'User-Agent': 'Negravis-Frontend/1.0'
+        },
+        signal: AbortSignal.timeout(10000) // Increased timeout to 10 seconds
       })
       
       if (response.ok) {
@@ -97,8 +100,9 @@ const getBackendTopics = async (): Promise<string[]> => {
         // Extract topic IDs from backend response
         const topics: string[] = []
         
-        // New format: data.hcsService.topics
+        // New format: data.hcsService.topics (prioritize this)
         if (data.success && data.hcsService?.topics) {
+          console.log('🎯 Processing hcsService.topics format:', data.hcsService.topics)
           Object.entries(data.hcsService.topics).forEach(([key, value]: [string, any]) => {
             if (typeof value === 'string' && value.match(/^0\.0\.\d+$/)) {
               topics.push(value)
@@ -109,24 +113,30 @@ const getBackendTopics = async (): Promise<string[]> => {
         
         // Legacy format fallback: data.data.topics
         if (topics.length === 0 && data.data?.topics) {
+          console.log('🔄 Trying legacy data.data.topics format:', data.data.topics)
           Object.values(data.data.topics).forEach((topic: any) => {
             if (typeof topic === 'string' && topic.match(/^0\.0\.\d+$/)) {
               topics.push(topic)
+              console.log(`✅ Found legacy topic: ${topic}`)
             }
           })
         }
         
         if (topics.length > 0) {
-          console.log(`✅ Successfully fetched ${topics.length} topics from ${backendUrl}`)
+          console.log(`✅ Successfully fetched ${topics.length} topics from ${backendUrl}:`, topics)
           return topics
+        } else {
+          console.log(`⚠️ No topics extracted from ${backendUrl} response:`, data)
         }
+      } else {
+        console.log(`⚠️ Backend ${backendUrl} returned non-OK status:`, response.status, response.statusText)
       }
     } catch (error) {
       console.log(`⚠️ Backend ${backendUrl} failed:`, error instanceof Error ? error.message : 'Unknown error')
     }
   }
   
-  console.log('⚠️ All backends failed, using known topics')
+  console.log('⚠️ All backends failed, using known topics only')
   return []
 }
 
@@ -283,6 +293,12 @@ export async function GET(request: NextRequest) {
     // Get all available topics (backend + known topics)
     const backendTopics = await getBackendTopics()
     const knownTopicsArray = Object.values(KNOWN_ORACLE_TOPICS)
+    
+    // Debug: Log backend topics result
+    console.log('📊 Backend topics result:', { 
+      count: backendTopics.length, 
+      topics: backendTopics 
+    })
     
     // Combine and deduplicate topic IDs
     const allTopics = [...new Set([...backendTopics, ...knownTopicsArray])]
