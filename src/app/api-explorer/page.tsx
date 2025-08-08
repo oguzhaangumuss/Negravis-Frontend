@@ -547,7 +547,7 @@ export default function APIExplorer() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-400">Response Time</span>
-                  <span className="text-green-400 font-semibold">< 200ms</span>
+                  <span className="text-green-400 font-semibold">&lt; 200ms</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-400">Success Rate</span>
