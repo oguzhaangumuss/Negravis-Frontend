@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import { WalletProvider } from "@/components/providers/WalletProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -58,15 +59,7 @@ export const metadata: Metadata = {
     description: "Advanced Oracle platform providing real-time data with AI-powered consensus mechanisms.",
     images: ["/twitter-image.jpg"],
   },
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 1,
-  },
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#000000" },
-  ],
+  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'),
   manifest: "/manifest.json",
   icons: {
     icon: [
@@ -103,14 +96,16 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white min-h-screen flex flex-col`}
         suppressHydrationWarning
       >
-        <Navbar />
-        <div className="relative flex-1">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-900/20 via-transparent to-transparent pointer-events-none" />
-          <main className="relative z-10">
-            {children}
-          </main>
-        </div>
-        <Footer />
+        <WalletProvider>
+          <Navbar />
+          <div className="relative flex-1">
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-900/20 via-transparent to-transparent pointer-events-none" />
+            <main className="relative z-10">
+              {children}
+            </main>
+          </div>
+          <Footer />
+        </WalletProvider>
         <script
           dangerouslySetInnerHTML={{
             __html: `

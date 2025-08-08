@@ -61,28 +61,31 @@ contract PriceFeed {
   ]
 
   return (
-    <section className="py-20 bg-gradient-to-b from-gray-900 to-black">
-      <div className="max-w-7xl mx-auto px-4">
-        <div className="text-center mb-16">
+    <section className="py-16 md:py-24 lg:py-32 bg-gradient-to-b from-black via-gray-900 to-black">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-16 md:mb-24">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
+            className="space-y-6 md:space-y-8"
           >
-            <span className="bg-gradient-to-r from-green-400 to-blue-500 text-transparent bg-clip-text text-sm font-semibold tracking-wider uppercase">
-              Hedera Smart Contract Service
-            </span>
-            <h2 className="text-4xl md:text-5xl font-bold text-white mt-4 mb-6">
+            <div className="mb-6">
+              <span className="bg-gradient-to-r from-green-400 to-blue-500 text-transparent bg-clip-text text-sm font-semibold tracking-wider uppercase">
+                Hedera Smart Contract Service
+              </span>
+            </div>
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white bg-gradient-to-r from-white to-gray-300 text-transparent bg-clip-text leading-tight">
               Oracle Contract Management
             </h2>
-            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+            <p className="text-lg md:text-xl text-gray-300 max-w-4xl mx-auto leading-relaxed">
               Deploy, execute, and manage Oracle smart contracts on Hedera with 10,000+ TPS throughput 
               and $0.001 transaction fees - enabling profitable micro-oracle queries.
             </p>
           </motion.div>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-12">
+        <div className="grid lg:grid-cols-2 gap-12 md:gap-16">
           {/* Contract Interface */}
           <motion.div
             initial={{ opacity: 0, x: -50 }}

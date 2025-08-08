@@ -108,21 +108,21 @@ class HederaShowcaseApiService {
    */
   async getHCSMessages(topicType?: string, limit: number = 10): Promise<HCSMessage[]> {
     try {
-      // Try to get real HCS transactions from backend
-      const hcsResponse = await fetch(`${this.baseUrl}/api/hcs/transactions?limit=${limit}${topicType ? `&type=${topicType}` : ''}`);
+      // Use local API endpoint instead of external service
+      const hcsResponse = await fetch(`/api/hcs/transactions?limit=${limit}${topicType ? `&type=${topicType}` : ''}`);
       
       if (hcsResponse.ok) {
         const hcsData = await hcsResponse.json();
         
         if (hcsData.success && hcsData.data?.transactions) {
-          // Transform real HCS transactions to frontend format
+          // Transform HCS transactions to frontend format
           return hcsData.data.transactions.map((tx: Record<string, unknown>) => ({
             id: tx.transactionId || `tx-${Date.now()}`,
-            timestamp: tx.timestamp,
-            type: (tx.type?.toString().toLowerCase().replace('_', '_') || 'oracle_query') as HashScanTransaction['type'],
-            data: tx.data,
-            txId: tx.transactionId,
-            topicId: tx.topicId
+            timestamp: tx.timestamp || new Date().toISOString(),
+            type: (tx.type?.toString() || 'oracle_query') as HCSMessage['type'],
+            data: tx.data || {},
+            txId: tx.transactionId || `tx-${Date.now()}`,
+            topicId: tx.topicId || '0.0.4629584'
           }));
         }
       }
