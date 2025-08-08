@@ -85,25 +85,27 @@ function HashscanPageContent() {
         // Check for Oracle data from backend API response
         if (result.data.oracle_data) {
           console.log('🔍 Found Oracle data in backend response:', result.data.oracle_data)
+          console.log('🔍 Oracle data type check:', typeof result.data.oracle_data)
+          console.log('🔍 Oracle data keys:', Object.keys(result.data.oracle_data))
           
           const oracleData = result.data.oracle_data
           const mockQueryResult = {
-            query: oracleData.query || 'Unknown Query',
-            answer: oracleData.answer || `$${oracleData.value?.toLocaleString()}` || 'N/A',
-            value: oracleData.value || 0,
-            confidence: oracleData.confidence || 1,
-            method: oracleData.method || 'median',
-            sources: oracleData.sources || [],
-            provider: oracleData.provider || 'unknown',
+            query: String(oracleData.query || 'Unknown Query'),
+            answer: String(oracleData.answer || (typeof oracleData.value === 'number' ? `$${oracleData.value?.toLocaleString()}` : JSON.stringify(oracleData.value)) || 'N/A'),
+            value: Number(oracleData.value) || 0,
+            confidence: Number(oracleData.confidence) || 1,
+            method: String(oracleData.method || 'median'),
+            sources: Array.isArray(oracleData.sources) ? oracleData.sources : [],
+            provider: String(oracleData.provider || 'unknown'),
             timestamp: result.data.timestamp,
             blockchain_hash: result.data.blockchain_hash || result.data.id,
             blockchain_link: result.data.explorer_url,
-            data_sources: (oracleData.raw_responses || []).map((response: any, index: number) => ({
-              name: response.source || `Source ${index + 1}`,
+            data_sources: Array.isArray(oracleData.raw_responses) ? oracleData.raw_responses.map((response: any, index: number) => ({
+              name: String(response.source || `Source ${index + 1}`),
               type: 'API',
               weight: '1.0',
-              confidence: Math.round((response.confidence || 0.95) * 100) + '%'
-            }))
+              confidence: `${Math.round((Number(response.confidence) || 0.95) * 100)}%`
+            })) : []
           }
           
           setQueryResult(mockQueryResult)
@@ -120,22 +122,22 @@ function HashscanPageContent() {
             const queryInfo = hcsData.query_info || {}
             
             const mockQueryResult = {
-              query: hcsData.query || queryInfo.query || 'Unknown Query',
-              answer: queryInfo.answer || `$${oracleResult.value?.toLocaleString()}` || oracleResult.value?.toString() || 'N/A',
-              value: oracleResult.value || 0,
-              confidence: oracleResult.confidence || 1,
-              method: oracleResult.method || 'median',
-              sources: oracleResult.sources || [],
-              provider: (oracleResult.sources && oracleResult.sources[0]) || 'unknown',
+              query: String(hcsData.query || queryInfo.query || 'Unknown Query'),
+              answer: String(queryInfo.answer || (typeof oracleResult.value === 'number' ? `$${oracleResult.value?.toLocaleString()}` : JSON.stringify(oracleResult.value)) || 'N/A'),
+              value: Number(oracleResult.value) || 0,
+              confidence: Number(oracleResult.confidence) || 1,
+              method: String(oracleResult.method || 'median'),
+              sources: Array.isArray(oracleResult.sources) ? oracleResult.sources : [],
+              provider: String((Array.isArray(oracleResult.sources) && oracleResult.sources[0]) || 'unknown'),
               timestamp: hcsData.timestamp || result.data.timestamp,
               blockchain_hash: result.data.blockchain_hash || result.data.id,
               blockchain_link: result.data.explorer_url,
-              data_sources: (oracleResult.raw_responses || []).map((response: any, index: number) => ({
-                name: response.source || `Source ${index + 1}`,
+              data_sources: Array.isArray(oracleResult.raw_responses) ? oracleResult.raw_responses.map((response: any, index: number) => ({
+                name: String(response.source || `Source ${index + 1}`),
                 type: 'API',
                 weight: '1.0',
-                confidence: Math.round((response.confidence || 0.95) * 100) + '%'
-              }))
+                confidence: `${Math.round((Number(response.confidence) || 0.95) * 100)}%`
+              })) : []
             }
             
             setQueryResult(mockQueryResult)
@@ -266,114 +268,7 @@ function HashscanPageContent() {
         {/* Query Result Display - Compact Design */}
         {queryResult && (
           <div className="space-y-6">
-            {/* Query Result Card */}
-            <div className="bg-slate-800 border border-slate-700/50 rounded-2xl p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <Database className="w-6 h-6 text-blue-400" />
-                  <h2 className="text-xl font-bold">Query Result</h2>
-                </div>
-                <span className="px-3 py-1 bg-red-500/20 text-red-400 text-sm rounded-full">
-                  NaN% Confidence
-                </span>
-              </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-6">
-                <div>
-                  <h3 className="text-sm font-medium text-slate-400 mb-2">Query</h3>
-                  <p className="text-lg font-medium">{queryResult.query}</p>
-                </div>
-                <div>
-                  <h3 className="text-sm font-medium text-slate-400 mb-2">Answer</h3>
-                  <p className="text-2xl font-bold text-green-400">{queryResult.answer}</p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-3 gap-6 text-sm">
-                <div className="flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-slate-400" />
-                  <span className="text-slate-400">{formatTimestamp(queryResult.timestamp)}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Activity className="w-4 h-4 text-slate-400" />
-                  <span className="text-slate-400">Query ID:</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Hash className="w-4 h-4 text-slate-400" />
-                  <span className="text-slate-400">Oracle:</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Data Sources */}
-            <div className="bg-slate-800 border border-slate-700/50 rounded-2xl p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <BarChart3 className="w-6 h-6 text-purple-400" />
-                <h3 className="text-xl font-bold">Data Sources</h3>
-              </div>
-              {queryResult.data_sources && queryResult.data_sources.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {queryResult.data_sources.map((source, index) => (
-                    <div key={index} className="bg-slate-700/30 rounded-lg p-4 border border-slate-600/30">
-                      <div className="flex items-center justify-between mb-2">
-                        <h4 className="font-semibold">{source.name}</h4>
-                        <span className="px-2 py-1 bg-blue-500/20 text-blue-400 text-xs rounded">
-                          {source.type}
-                        </span>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4 text-sm">
-                        <div>
-                          <span className="text-slate-400">Weight:</span>
-                          <span className="ml-2 font-medium">{source.weight}</span>
-                        </div>
-                        <div>
-                          <span className="text-slate-400">Confidence:</span>
-                          <span className="ml-2 font-medium">{source.confidence}%</span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-slate-400">No data sources available</p>
-              )}
-            </div>
-
-            {/* Blockchain Verification */}
-            <div className="bg-slate-800 border border-slate-700/50 rounded-2xl p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                <h3 className="text-xl font-bold">Blockchain Verification</h3>
-              </div>
-              
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div>
-                  <h4 className="font-medium text-slate-400 mb-2">Transaction Hash</h4>
-                  <div className="bg-slate-700/50 p-4 rounded-lg border border-slate-600/30 mb-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <code className="text-sm font-mono break-all">
-                        {queryResult.blockchain_hash}
-                      </code>
-                      <CopyButton text={queryResult.blockchain_hash} />
-                    </div>
-                  </div>
-                </div>
-                
-                <div>
-                  <h4 className="font-medium text-slate-400 mb-2">Hedera Explorer</h4>
-                  <p className="text-slate-400 text-sm mb-4">View on blockchain</p>
-                  <a
-                    href={queryResult.blockchain_link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg font-semibold transition-all"
-                  >
-                    <ExternalLink className="w-4 h-4" />
-                    View
-                  </a>
-                </div>
-              </div>
-            </div>
           </div>
         )}
 
@@ -450,8 +345,8 @@ function HashscanPageContent() {
                                 </div>
                                 <div className="grid grid-cols-2 gap-4 text-sm">
                                   <div>
-                                    <span className="text-slate-400">Price:</span>
-                                    <span className="ml-2 font-medium">${((response.data as Record<string, unknown>)?.price as number) || 0}</span>
+                                    <span className="text-slate-400">Weight:</span>
+                                    <span className="ml-2 font-medium">1.0</span>
                                   </div>
                                   <div>
                                     <span className="text-slate-400">Confidence:</span>
