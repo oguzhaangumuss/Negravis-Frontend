@@ -68,39 +68,65 @@ const KNOWN_ORACLE_TOPICS = {
   oracle_3: "0.0.6533618",   // Possible Oracle topic
   oracle_4: "0.0.6533619",   // Possible Oracle topic
   oracle_5: "0.0.6533620",   // Possible Oracle topic
+  
+  // Latest backend topics (added as discovered)
+  latest_oracle: "0.0.6496308",  // Latest Oracle queries (current session)
 }
 
 // Function to get backend Oracle topics dynamically
 const getBackendTopics = async (): Promise<string[]> => {
-  try {
-    // Try to get topics from backend HCS service
-    const response = await fetch('http://localhost:4001/api/hcs/topics', {
-      method: 'GET',
-      headers: { 'Accept': 'application/json' }
-    })
-    
-    if (response.ok) {
-      const data = await response.json()
-      console.log('📡 Backend HCS Topics:', data)
+  const backends = [
+    'https://negravis-backend.vercel.app/api/hcs/topics', // Production backend
+    'http://localhost:4001/api/hcs/topics' // Local backend fallback
+  ]
+  
+  for (const backendUrl of backends) {
+    try {
+      console.log(`🔍 Trying backend: ${backendUrl}`)
       
-      // Extract topic IDs from backend response
-      const topics: string[] = []
-      if (data.success && data.hcsService?.topics) {
-        Object.values(data.hcsService.topics).forEach((topic: any) => {
-          if (topic?.id) {
-            // Extract topic ID from HashScan URL or direct ID
-            const match = topic.id.match(/0\.0\.\d+/)
-            if (match) topics.push(match[0])
-          }
-        })
+      const response = await fetch(backendUrl, {
+        method: 'GET',
+        headers: { 'Accept': 'application/json' },
+        signal: AbortSignal.timeout(5000)
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        console.log('📡 Backend HCS Topics:', data)
+        
+        // Extract topic IDs from backend response
+        const topics: string[] = []
+        
+        // New format: data.hcsService.topics
+        if (data.success && data.hcsService?.topics) {
+          Object.entries(data.hcsService.topics).forEach(([key, value]: [string, any]) => {
+            if (typeof value === 'string' && value.match(/^0\.0\.\d+$/)) {
+              topics.push(value)
+              console.log(`✅ Found ${key} topic: ${value}`)
+            }
+          })
+        }
+        
+        // Legacy format fallback: data.data.topics
+        if (topics.length === 0 && data.data?.topics) {
+          Object.values(data.data.topics).forEach((topic: any) => {
+            if (typeof topic === 'string' && topic.match(/^0\.0\.\d+$/)) {
+              topics.push(topic)
+            }
+          })
+        }
+        
+        if (topics.length > 0) {
+          console.log(`✅ Successfully fetched ${topics.length} topics from ${backendUrl}`)
+          return topics
+        }
       }
-      
-      return topics
+    } catch (error) {
+      console.log(`⚠️ Backend ${backendUrl} failed:`, error instanceof Error ? error.message : 'Unknown error')
     }
-  } catch (error) {
-    console.log('⚠️ Backend topics fetch failed, using known topics')
   }
   
+  console.log('⚠️ All backends failed, using known topics')
   return []
 }
 
