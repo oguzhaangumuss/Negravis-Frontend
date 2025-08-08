@@ -15,21 +15,20 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Create request body for Oracle Manager
-    const requestBody = {
-      query,
-      ...(sources && { sources: sources.split(',') }),
+    // Build query parameters for Oracle API Controller (uses GET with query params)
+    const queryParams = new URLSearchParams({
+      q: query,
+      ...(sources && { sources }),
       ...(method && { method }),
-      ...(timeout && { timeout: parseInt(timeout) })
-    }
+      ...(timeout && { timeout })
+    });
 
-    // Route to New Oracle Manager endpoint (not Legacy)
-    const response = await fetch('https://negravis-app.vercel.app/api/oracle-manager/query', {
-      method: 'POST',
+    // Route to Oracle API Controller endpoint (WITH DATABASE RECORDING)
+    const response = await fetch(`https://negravis-app.vercel.app/api/oracle/query?${queryParams}`, {
+      method: 'GET',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(requestBody),
     })
 
     const data = await response.json()
@@ -54,14 +53,21 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
+    const { query, provider, userId } = body;
     
-    // Route to New Oracle Manager endpoint (not Legacy)
-    const response = await fetch('https://negravis-app.vercel.app/api/oracle-manager/query', {
-      method: 'POST',
+    // Build query parameters for Oracle API Controller (uses GET with query params)
+    const queryParams = new URLSearchParams({
+      q: query,
+      ...(provider && { sources: provider }),
+      ...(userId && { user: userId })
+    });
+    
+    // Route to Oracle API Controller endpoint (WITH DATABASE RECORDING)
+    const response = await fetch(`https://negravis-app.vercel.app/api/oracle/query?${queryParams}`, {
+      method: 'GET',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(body),
     })
 
     const data = await response.json()
