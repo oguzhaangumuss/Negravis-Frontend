@@ -547,7 +547,7 @@ export default function APIExplorer() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-400">Response Time</span>
-                  <span className="text-green-400 font-semibold">< 200ms</span>
+                  <span className="text-green-400 font-semibold">&lt; 200ms</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-400">Success Rate</span>
@@ -601,7 +601,7 @@ export default function APIExplorer() {
                                   {endpoint.status}
                                 </span>
                                 {endpoint.authenticated && (
-                                  <Shield className="w-4 h-4 text-yellow-400" title="Authentication required" />
+                                  <Shield className="w-4 h-4 text-yellow-400" />
                                 )}
                                 {expandedEndpoints.has(endpoint.id) ? (
                                   <ChevronDown className="w-5 h-5 text-gray-400" />

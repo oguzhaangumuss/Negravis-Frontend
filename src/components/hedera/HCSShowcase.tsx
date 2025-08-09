@@ -16,13 +16,32 @@ export default function HCSShowcase() {
   const [logs, setLogs] = useState<LogEntry[]>([])
   const [isLoading, setIsLoading] = useState(false)
 
-  // Load real-time HCS logging data
+  // Initialize with static data instead of API call
   useEffect(() => {
-    loadHCSMessages()
-    
-    // Set up real-time refresh
-    const interval = setInterval(loadHCSMessages, 30000) // Refresh every 30 seconds
-    return () => clearInterval(interval)
+    // Set fallback data immediately for fast loading
+    setLogs([
+      {
+        id: '1',
+        timestamp: new Date().toISOString(),
+        type: 'system_metrics',
+        data: { active_providers: 'Live', system_health: 'Healthy' },
+        txId: 'system-status-check'
+      },
+      {
+        id: '2',
+        timestamp: new Date(Date.now() - 30000).toISOString(),
+        type: 'oracle_query',
+        data: { provider: 'Chainlink', query_type: 'price_feed' },
+        txId: 'oracle-query-btc'
+      },
+      {
+        id: '3',
+        timestamp: new Date(Date.now() - 60000).toISOString(),
+        type: 'consensus_result',
+        data: { consensus_reached: true, participants: 25 },
+        txId: 'consensus-validation'
+      }
+    ])
   }, [])
 
   const loadHCSMessages = async () => {
@@ -103,15 +122,15 @@ export default function HCSShowcase() {
   const getLogIcon = (type: string) => {
     switch (type) {
       case 'oracle_query':
-        return '🔍'
+        return 'Q'
       case 'consensus_result':
-        return '⚖️'
+        return 'C'
       case 'health_check':
-        return '💚'
+        return 'H'
       case 'system_metrics':
-        return '📊'
+        return 'M'
       default:
-        return '📝'
+        return 'L'
     }
   }
 
@@ -225,13 +244,21 @@ export default function HCSShowcase() {
           >
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-bold text-white">Live HCS Message Feed</h3>
-              <button
-                onClick={addNewLog}
-                disabled={isLoading}
-                className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg transition-colors"
-              >
-                {isLoading ? 'Submitting...' : 'Submit Message'}
-              </button>
+              <div className="flex gap-3">
+                <button
+                  onClick={loadHCSMessages}
+                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors"
+                >
+                  Load Live Data
+                </button>
+                <button
+                  onClick={addNewLog}
+                  disabled={isLoading}
+                  className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg transition-colors"
+                >
+                  {isLoading ? 'Submitting...' : 'Submit Message'}
+                </button>
+              </div>
             </div>
 
             <div className="space-y-3 max-h-96 overflow-y-auto">

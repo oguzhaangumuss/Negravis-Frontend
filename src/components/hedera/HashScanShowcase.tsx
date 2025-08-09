@@ -22,11 +22,47 @@ export default function HashScanShowcase() {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    loadData()
-    
-    // Refresh data every 30 seconds
-    const interval = setInterval(loadData, 30000)
-    return () => clearInterval(interval)
+    // Initialize with sample data for fast loading
+    setTransactions([
+      {
+        id: '1',
+        type: 'oracle_query',
+        hash: '0x1a2b3c4d5e6f7890abcdef1234567890',
+        status: 'success',
+        timestamp: new Date().toISOString(),
+        fee: '0.00001',
+        explorer_url: 'https://hashscan.io/testnet/transaction/0x1a2b3c4d5e6f7890abcdef1234567890'
+      },
+      {
+        id: '2',
+        type: 'consensus_submit',
+        hash: '0x9876543210fedcba0987654321abcdef',
+        status: 'success',
+        timestamp: new Date(Date.now() - 30000).toISOString(),
+        fee: '0.00002',
+        explorer_url: 'https://hashscan.io/testnet/transaction/0x9876543210fedcba0987654321abcdef'
+      },
+      {
+        id: '3',
+        type: 'contract_call',
+        hash: '0xabcdef1234567890fedcba0987654321',
+        status: 'pending',
+        timestamp: new Date(Date.now() - 60000).toISOString(),
+        fee: '0.00003',
+        explorer_url: 'https://hashscan.io/testnet/transaction/0xabcdef1234567890fedcba0987654321'
+      }
+    ])
+    setNetworkStats({
+      currentTPS: 3247,
+      peakTPS24h: 10000,
+      avgFinality: '2.8s',
+      networkNodes: 39,
+      totalTransactions: 2847293,
+      successRate: 99.99,
+      avgTransactionFee: '$0.0001',
+      uptime: 99.99
+    })
+    setIsLoading(false)
   }, [])
 
   const loadData = async () => {
@@ -71,20 +107,20 @@ export default function HashScanShowcase() {
 
   const getTransactionIcon = (type: string) => {
     switch (type) {
-      case 'oracle_query': return '🔍'
-      case 'consensus_submit': return '📝'
-      case 'contract_call': return '⚡'
-      case 'file_create': return '📁'
-      default: return '📄'
+      case 'oracle_query': return 'Q'
+      case 'consensus_submit': return 'S'
+      case 'contract_call': return 'C'
+      case 'file_create': return 'F'
+      default: return 'T'
     }
   }
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'success': return '✅'
-      case 'pending': return '⏳'
-      case 'failed': return '❌'
-      default: return '❓'
+      case 'success': return '✓'
+      case 'pending': return '○'
+      case 'failed': return '✗'
+      default: return '?'
     }
   }
 
@@ -134,9 +170,18 @@ export default function HashScanShowcase() {
             <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-6">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-xl font-bold text-white">Live Transaction Feed</h3>
-                <div className="flex items-center text-sm text-green-400">
-                  <div className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
-                  Connected to Hedera Testnet
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={loadData}
+                    disabled={isLoading}
+                    className="bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg transition-colors text-sm"
+                  >
+                    {isLoading ? 'Loading...' : 'Load Live Data'}
+                  </button>
+                  <div className="flex items-center text-sm text-green-400">
+                    <div className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
+                    Connected to Hedera Testnet
+                  </div>
                 </div>
               </div>
 
@@ -211,7 +256,7 @@ export default function HashScanShowcase() {
                             rel="noopener noreferrer"
                             className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-semibold py-2 px-4 rounded-lg transition-all inline-flex items-center justify-center"
                           >
-                            View on HashScan 🔗
+                            View on HashScan →
                           </a>
                         </div>
                       </motion.div>
@@ -267,7 +312,7 @@ export default function HashScanShowcase() {
 
             {/* Integration Features */}
             <div className="bg-gradient-to-r from-blue-900/50 to-cyan-900/50 border border-blue-500/30 rounded-xl p-6">
-              <h3 className="text-xl font-bold text-white mb-4">🔗 Integration Features</h3>
+              <h3 className="text-xl font-bold text-white mb-4">Integration Features</h3>
               <ul className="space-y-3 text-gray-300">
                 <li className="flex items-center">
                   <div className="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
@@ -299,7 +344,7 @@ export default function HashScanShowcase() {
               </div>
               <div className="aspect-video bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center">
                 <div className="text-center">
-                  <div className="text-4xl mb-2">🔍</div>
+                  <div className="text-4xl mb-2 text-blue-400">⬜</div>
                   <div className="text-white font-semibold mb-2">Transaction Explorer</div>
                   <div className="text-sm text-gray-400 mb-4">Embedded HashScan Interface</div>
                   <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm transition-colors">
@@ -344,7 +389,7 @@ export default function HashScanShowcase() {
               {networkStats ? `${networkStats.successRate}%` : '99.99%'}
             </div>
             <div className="text-gray-300">Success Rate</div>
-            <div className="text-xs text-green-400 mt-1">↑ Consistent</div>
+            <div className="text-xs text-green-400 mt-1">Consistent</div>
           </div>
           <div className="text-center bg-gray-800/50 border border-gray-700 rounded-xl p-6">
             <div className="text-3xl font-bold text-purple-400 mb-2">

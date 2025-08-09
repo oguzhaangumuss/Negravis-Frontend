@@ -51,11 +51,11 @@ export default function HFSShowcase() {
 
   const getDocumentIcon = (type: string) => {
     switch (type) {
-      case 'drivers_license': return '🚗'
-      case 'passport': return '🛂'
-      case 'national_id': return '🆔'
-      case 'professional_license': return '📜'
-      default: return '📄'
+      case 'drivers_license': return 'DL'
+      case 'passport': return 'PP'
+      case 'national_id': return 'ID'
+      case 'professional_license': return 'PL'
+      default: return 'DOC'
     }
   }
 
