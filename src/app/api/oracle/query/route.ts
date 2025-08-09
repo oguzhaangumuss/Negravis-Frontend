@@ -28,6 +28,7 @@ export async function GET(request: NextRequest) {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
+        'x-session-id': `frontend-get-${Date.now()}`, // Ensure session ID is sent
       },
     })
 
@@ -67,6 +68,7 @@ export async function POST(request: NextRequest) {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
+        'x-session-id': userId || `frontend-${Date.now()}`, // Ensure session ID is sent
       },
     })
 
