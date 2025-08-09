@@ -23,7 +23,7 @@ const perspectiveOracles = [
   // Premium Oracles
   { 
     id: 'chainlink', 
-    name: '🔗 Chainlink', 
+    name: 'Chainlink', 
     icon: Activity, 
     color: 'text-blue-400',
     providers: ['chainlink'],
@@ -35,7 +35,7 @@ const perspectiveOracles = [
   // Free Oracles
   { 
     id: 'coingecko', 
-    name: '🦎 CoinGecko', 
+    name: 'CoinGecko', 
     icon: Coins, 
     color: 'text-yellow-400',
     providers: ['coingecko'],
@@ -45,7 +45,7 @@ const perspectiveOracles = [
   },
   { 
     id: 'dia', 
-    name: '💎 DIA Oracle', 
+    name: 'DIA Oracle', 
     icon: BarChart3, 
     color: 'text-cyan-400',
     providers: ['dia'],
@@ -55,7 +55,7 @@ const perspectiveOracles = [
   },
   { 
     id: 'weather', 
-    name: '🌤️ Weather Oracle', 
+    name: 'Weather Oracle', 
     icon: Cloud, 
     color: 'text-green-400',
     providers: ['weather'],
@@ -65,7 +65,7 @@ const perspectiveOracles = [
   },
   { 
     id: 'exchangerate', 
-    name: '💱 Exchange Rate', 
+    name: 'Exchange Rate', 
     icon: Activity, 
     color: 'text-orange-400',
     providers: ['exchangerate'],
@@ -75,7 +75,7 @@ const perspectiveOracles = [
   },
   { 
     id: 'sports', 
-    name: '🏀 Sports Oracle', 
+    name: 'Sports Oracle', 
     icon: Activity, 
     color: 'text-purple-400',
     providers: ['sports'],
@@ -87,7 +87,7 @@ const perspectiveOracles = [
   // Official Oracles  
   { 
     id: 'nasa', 
-    name: '🚀 NASA', 
+    name: 'NASA', 
     icon: Zap, 
     color: 'text-red-400',
     providers: ['nasa'],
@@ -99,7 +99,7 @@ const perspectiveOracles = [
   // Community Oracles
   { 
     id: 'wikipedia', 
-    name: '📚 Wikipedia', 
+    name: 'Wikipedia', 
     icon: Bot, 
     color: 'text-indigo-400',
     providers: ['wikipedia'],
@@ -118,7 +118,7 @@ export default function OracleAssistant() {
     {
       id: '1',
       type: 'assistant',
-      content: 'Welcome to Negravis Oracle System! 🎭✨\n\n**Available Oracle Agents (8 Total):**\n\n**🔥 Premium:**\n🔗 **Chainlink** - Enterprise oracle network (95% reliability)\n\n**💎 Standard:**\n🦎 **CoinGecko** - Crypto market data (90% reliability)\n💎 **DIA Oracle** - 3000+ transparent token feeds (91% reliability)\n🌤️ **Weather** - Global forecasts and climate (89% reliability)\n💱 **Exchange Rate** - Forex and currency conversion (90% reliability)\n🏀 **Sports** - NBA and global sports data (92% reliability)\n\n**🏛️ Official:**\n🚀 **NASA** - Space, astronomy, Earth data (92% reliability)\n\n**🌐 Community:**\n📚 **Wikipedia** - Knowledge encyclopedia (88% reliability)\n**How to start:**\n1. Select your preferred Oracle from the dropdown above\n2. Click "Launch Agent"\n3. Ask questions - responses include blockchain verification!\n\n🔗 All responses are logged on Hedera blockchain with hash & explorer links.',
+      content: 'Welcome to Negravis Oracle System!\n\n**Available Oracle Agents (8 Total):**\n\n**Premium:**\n**Chainlink** - Enterprise oracle network (95% reliability)\n\n**Standard:**\n**CoinGecko** - Crypto market data (90% reliability)\n**DIA Oracle** - 3000+ transparent token feeds (91% reliability)\n**Weather Oracle** - Global forecasts and climate (89% reliability)\n**Exchange Rate** - Forex and currency conversion (90% reliability)\n**Sports Oracle** - NBA and global sports data (92% reliability)\n\n**Official:**\n**NASA** - Space, astronomy, Earth data (92% reliability)\n\n**Community:**\n**Wikipedia** - Knowledge encyclopedia (88% reliability)\n\n**How to start:**\n1. Select your preferred Oracle from the dropdown above\n2. Click "Launch Agent"\n3. Ask questions - responses include blockchain verification!\n\nAll responses are logged on Hedera blockchain with hash & explorer links.',
       timestamp: new Date()
     }
   ])

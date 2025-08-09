@@ -73,29 +73,8 @@ export default function Navbar() {
   })
   const pathname = usePathname()
 
-  useEffect(() => {
-    // System status polling
-    const fetchSystemStatus = async () => {
-      try {
-        const response = await fetch('/api/oracle/status')
-        if (response.ok) {
-          const data = await response.json()
-          setSystemStatus({
-            isLive: data.success,
-            activeProviders: data.data?.active_count || 2,
-            totalProviders: data.data?.total_count || 10
-          })
-        }
-      } catch (error) {
-        console.error('Failed to fetch system status:', error)
-      }
-    }
-
-    fetchSystemStatus()
-    const interval = setInterval(fetchSystemStatus, 30000) // 30 seconds
-
-    return () => clearInterval(interval)
-  }, [])
+  // Removed automatic API polling for faster page loads
+  // Status is now static for instant loading
 
   const isActive = (href: string) => {
     if (href === '/') return pathname === '/'
@@ -103,27 +82,34 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="bg-black border-b border-gray-800 sticky top-0 z-50 backdrop-blur-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo */}
+    <nav className="bg-black/95 border-b border-gray-800/50 sticky top-0 z-50 backdrop-blur-md shadow-lg">
+      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-10">
+        <div className="flex items-center justify-between h-20">
+          {/* Clean Logo */}
           <div className="flex items-center">
-            <Link href="/" className="flex items-center space-x-3">
-              <div className="text-2xl">⚡</div>
-              <div className="text-white font-bold text-xl">
-                Negravis
+            <Link href="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
+              <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+                <div className="w-4 h-4 bg-white rounded-sm"></div>
+              </div>
+              <div className="flex flex-col">
+                <div className="text-white font-bold text-xl">
+                  Negravis
+                </div>
+                <div className="text-xs text-gray-400 font-medium">
+                  ORACLE PLATFORM
+                </div>
               </div>
             </Link>
           </div>
 
-          {/* Desktop Navigation */}
+          {/* Compact Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-1">
             <Link
               href="/"
-              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+              className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                 pathname === '/' 
-                  ? 'text-white bg-gray-800' 
-                  : 'text-gray-300 hover:text-white hover:bg-gray-700'
+                  ? 'text-white bg-blue-600' 
+                  : 'text-gray-300 hover:text-white hover:bg-gray-800'
               }`}
             >
               Home
@@ -134,10 +120,10 @@ export default function Navbar() {
                 <Link
                   key={item.name}
                   href={item.href}
-                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-2 ${
+                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center space-x-1 ${
                     isActive(item.href)
-                      ? 'text-white bg-gray-800' 
-                      : 'text-gray-300 hover:text-white hover:bg-gray-700'
+                      ? 'text-white bg-blue-600' 
+                      : 'text-gray-300 hover:text-white hover:bg-gray-800'
                   }`}
                 >
                   <Icon className="w-4 h-4" />
@@ -149,13 +135,11 @@ export default function Navbar() {
 
           {/* System Status, Wallet & Mobile Menu */}
           <div className="flex items-center space-x-4">
-            {/* System Status */}
-            <div className="hidden md:flex items-center space-x-2">
-              <Circle 
-                className={`w-2 h-2 ${systemStatus.isLive ? 'text-green-400 fill-green-400' : 'text-red-400 fill-red-400'}`} 
-              />
-              <span className="text-sm text-gray-300 whitespace-nowrap">
-                {systemStatus.isLive ? 'Live Data Stream' : 'Offline'}
+            {/* Simple System Status */}
+            <div className="hidden lg:flex items-center space-x-2 text-sm">
+              <div className={`w-2 h-2 rounded-full ${systemStatus.isLive ? 'bg-green-400' : 'bg-red-400'}`}></div>
+              <span className="text-gray-300">
+                {systemStatus.isLive ? 'Live' : 'Offline'}
               </span>
             </div>
 
@@ -181,16 +165,16 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Navigation Menu */}
+      {/* Simple Mobile Navigation Menu */}
       {isMobileMenuOpen && (
         <div className="md:hidden bg-black border-t border-gray-800">
-          <div className="px-2 pt-2 pb-3 space-y-1">
+          <div className="px-4 py-4 space-y-1">
             <Link
               href="/"
-              className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
+              className={`block px-3 py-2 rounded-lg text-base font-medium ${
                 pathname === '/'
-                  ? 'text-white bg-gray-800'
-                  : 'text-gray-300 hover:text-white hover:bg-gray-700'
+                  ? 'text-white bg-blue-600'
+                  : 'text-gray-300 hover:text-white hover:bg-gray-800'
               }`}
               onClick={() => setIsMobileMenuOpen(false)}
             >
@@ -202,36 +186,30 @@ export default function Navbar() {
                 <Link
                   key={item.name}
                   href={item.href}
-                  className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
+                  className={`flex items-center px-3 py-2 rounded-lg text-base font-medium ${
                     isActive(item.href)
-                      ? 'text-white bg-gray-800'
-                      : 'text-gray-300 hover:text-white hover:bg-gray-700'
+                      ? 'text-white bg-blue-600'
+                      : 'text-gray-300 hover:text-white hover:bg-gray-800'
                   }`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  <div className="flex items-center space-x-3">
-                    <Icon className="w-5 h-5 flex-shrink-0" />
-                    <div className="min-w-0">
-                      <div className="font-medium whitespace-nowrap">{item.name}</div>
-                      <div className="text-sm text-gray-400 truncate">{item.description}</div>
-                    </div>
-                  </div>
+                  <Icon className="w-4 h-4 mr-3" />
+                  {item.name}
                 </Link>
               )
             })}
           </div>
           
-          {/* Mobile System Status */}
-          <div className="border-t border-gray-800 px-4 py-3">
-            <div className="flex items-center justify-center">
-              <div className="flex items-center space-x-2">
-                <Circle 
-                  className={`w-2 h-2 ${systemStatus.isLive ? 'text-green-400 fill-green-400' : 'text-red-400 fill-red-400'}`} 
-                />
-                <span className="text-sm text-gray-300">
-                  {systemStatus.isLive ? 'Live Data Stream' : 'Offline'}
-                </span>
-              </div>
+          {/* Mobile System Status & Wallet */}
+          <div className="border-t border-gray-800 px-4 py-4 space-y-3">
+            <div className="flex items-center justify-center text-sm">
+              <div className={`w-2 h-2 rounded-full mr-2 ${systemStatus.isLive ? 'bg-green-400' : 'bg-red-400'}`}></div>
+              <span className="text-gray-300">
+                {systemStatus.isLive ? 'Live' : 'Offline'}
+              </span>
+            </div>
+            <div>
+              <WalletConnect variant="navbar" />
             </div>
           </div>
         </div>

@@ -9,7 +9,8 @@ import {
   TrendingUp, 
   Shield, 
   FileText,
-  Zap
+  Zap,
+  ExternalLink
 } from 'lucide-react'
 import ProviderDashboard from '../../components/oracle/ProviderDashboard'
 import InteractiveQueryBuilder from '../../components/oracle/InteractiveQueryBuilder'
