@@ -74,7 +74,7 @@ const metadata = {
   name: 'Negravis Oracle Platform',
   description: 'Enterprise-Grade Oracle Infrastructure Built on Hedera',
   url: typeof window !== 'undefined' ? window.location.origin : 'https://negravis.com',
-  icons: ['/favicon.ico']
+  icons: ['https://via.placeholder.com/192x192/3b82f6/ffffff?text=N']
 }
 
 // Initialize AppKit only on client side
